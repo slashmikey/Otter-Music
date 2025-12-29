@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Otter Music | Soundscapes</title>
     
-    <!-- Preload Critical Assets -->
+    <!-- Preload Critical Assets (Logo & First Song Cover) for Instant Load -->
     <link rel="preload" as="image" href="https://i.postimg.cc/Hsfv2Lb4/logo.png">
+    <link rel="preload" as="image" href="https://i.postimg.cc/8cdmDLyJ/ab67616d00001e02ea64b5c4078aaf996009381a.jpg">
     
     <!-- Website Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="https://i.postimg.cc/Hsfv2Lb4/logo.png">
@@ -101,6 +102,9 @@
         .platform-link { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .platform-link:hover { transform: translateY(-2px); filter: brightness(1.2); }
         button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid #cba172; outline-offset: 4px; }
+        
+        /* Optimization for touch delay */
+        a, button, input { touch-action: manipulation; }
 
         /* Animations */
         .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
@@ -139,6 +143,10 @@
         /* Tap Targets Mobile */
         @media (max-width: 640px) {
             .tap-target { min-height: 48px; min-width: 48px; display: flex; align-items: center; justify-content: center; }
+            
+             /* Ensure volume handle is visible while dragging on mobile/tablet */
+            .volume-range::-webkit-slider-thumb { opacity: 1 !important; }
+            .volume-range::-moz-range-thumb { opacity: 1 !important; }
         }
 
         /* --- Spotify-like Custom Range Slider --- */
@@ -193,16 +201,10 @@
             transition: opacity 0.2s, transform 0.2s;
         }
 
-        /* Hover States for Handle */
+        /* Hover States for Handle (Desktop) */
         .volume-container:hover .volume-range::-webkit-slider-thumb { opacity: 1; }
         .volume-container:hover .volume-range::-moz-range-thumb { opacity: 1; }
         .volume-range:active::-webkit-slider-thumb { transform: scale(1.1); }
-
-        /* Track color is handled via JS background linear-gradient for the 'fill' effect */
-        .volume-range:hover {
-            /* Handled in JS to brighten the fill color on hover if desired, 
-               but CSS hover brightness on the container is usually enough */
-        }
     </style>
 </head>
 <body class="bg-otter-dark text-gray-200 font-sans selection:bg-otter-accent selection:text-black antialiased overflow-x-hidden pb-24">
@@ -536,13 +538,13 @@
                 const audio = new Audio();
                 audio.crossOrigin = "anonymous"; 
                 audio.src = url;
-                // Faster Loading: set preload to auto and use MediaElement backend
+                // Aggressive preloading for instant play
                 audio.preload = 'auto'; 
                 audio.volume = this.volume;
 
                 const ws = WaveSurfer.create({
                     container: container,
-                    media: audio,
+                    media: audio, 
                     waveColor: '#4b5563',
                     progressColor: '#cba172',
                     cursorColor: '#ffffff',
@@ -555,6 +557,8 @@
                     fillParent: true,
                     hideScrollbar: true,
                     interact: true,
+                    // Performance tweak: force 1x pixel ratio for mobile smoothness
+                    pixelRatio: 1, 
                 });
 
                 // Events
@@ -563,6 +567,8 @@
                     if(spinner) spinner.remove();
                     container.classList.remove('opacity-0');
                     container.classList.add('opacity-80');
+                    // Force a redraw to ensure visibility
+                    ws.draw();
                 });
 
                 ws.on('play', () => {
@@ -808,11 +814,15 @@
             
             // New: Preload all songs sequentially to reduce perceieved lag
             startBackgroundLoading() {
-                songs.forEach((song, index) => {
-                    // Stagger loading by 500ms each to prevent freezing the UI
+                // Mobile Optimization: Load first song IMMEDIATELY (no delay)
+                const firstSong = songs[0];
+                if(firstSong) this.createWaveSurfer(firstSong.id, firstSong.previewUrl);
+
+                // Load the rest sequentially with a small delay to prevent UI thread blocking
+                songs.slice(1).forEach((song, index) => {
                     setTimeout(() => {
                          this.createWaveSurfer(song.id, song.previewUrl);
-                    }, index * 500);
+                    }, 500 + (index * 800)); // Staggered loading
                 });
             }
         };
@@ -979,7 +989,9 @@
 
                 container.innerHTML = songs.map((song, index) => {
                     const bgClass = colors[index % colors.length];
-                    // Using lazy loading for images but eagar loading for the very first one if it were at top (here they are below fold)
+                    // Optimization: First 2 images are eager loaded, rest are lazy
+                    const loadingStrategy = index < 2 ? 'eager' : 'lazy';
+                    
                     return `
                     <div class="glass-panel rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center md:items-start group transition-colors duration-500 card-fade-item relative overflow-hidden" data-id="${song.id}">
                         <!-- Subtle BG Blob -->
@@ -988,7 +1000,7 @@
                         <div class="relative shrink-0">
                             <div class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-2xl relative z-10 vinyl-container transition-transform duration-700 ease-out" id="vinyl-${song.id}">
                                 <div class="absolute inset-0 bg-black"></div>
-                                <img src="${song.cover}" alt="Cover Art for ${song.title}" class="w-full h-full object-cover opacity-80" loading="lazy">
+                                <img src="${song.cover}" alt="Cover Art for ${song.title}" class="w-full h-full object-cover opacity-80" loading="${loadingStrategy}">
                                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-otter-card rounded-full border-2 border-otter-accent/50 z-20"></div>
                                 <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent rounded-full"></div>
                             </div>
@@ -1084,11 +1096,8 @@
             AudioController.init();
             UI.init();
             
-            // Start loading audio in background immediately so it's ready when user scrolls
-            // Wait 1s for initial paint to finish
-            setTimeout(() => {
-                AudioController.startBackgroundLoading();
-            }, 1000);
+            // Start loading audio immediately on load (no delay for first item)
+            AudioController.startBackgroundLoading();
         });
 
     </script>
