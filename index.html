@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Otter Music | Soundscapes</title>
     
+    <!-- Preload Critical Assets -->
+    <link rel="preload" as="image" href="https://i.postimg.cc/Hsfv2Lb4/logo.png">
+    
     <!-- Website Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="https://i.postimg.cc/Hsfv2Lb4/logo.png">
     <link rel="icon" type="image/png" sizes="192x192" href="https://i.postimg.cc/Hsfv2Lb4/logo.png">
@@ -32,12 +35,9 @@
                     },
                     colors: {
                         'otter-dark': '#0f0e13',
-                        'otter-card': '#16151a', /* Slightly darker for better contrast */
+                        'otter-card': '#16151a', 
                         'otter-accent': '#cba172',
                         'otter-accent-hover': '#e0b686',
-                    },
-                    backgroundImage: {
-                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
                     },
                     screens: {
                         'xs': '480px',
@@ -62,17 +62,14 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Vinyl Spin Animation with Easing */
+        /* Vinyl Spin Animation */
         @keyframes spin-slow {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-        .animate-spin-slow {
-            animation: spin-slow 8s linear infinite;
-        }
+        .animate-spin-slow { animation: spin-slow 8s linear infinite; }
         .paused-spin {
             animation-play-state: paused;
-            /* Dim vinyl when paused */
             filter: brightness(0.7) grayscale(0.3);
             transition: filter 0.5s ease;
         }
@@ -81,10 +78,9 @@
             transition: filter 0.5s ease;
         }
 
-        /* Glassmorphism Utilities - Refined for Performance & Visuals */
+        /* Glassmorphism */
         .glass-panel {
             background: rgba(255, 255, 255, 0.02);
-            /* Reduced blur for performance and visual clarity in lists */
             backdrop-filter: blur(8px); 
             border: 1px solid rgba(255, 255, 255, 0.03);
             box-shadow: 0 4px 20px rgba(0,0,0,0.2); 
@@ -102,44 +98,17 @@
         }
 
         /* Hover & Focus Effects */
-        .platform-link {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .platform-link:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.2);
-        }
-        /* High Visibility Focus for Accessibility */
-        button:focus-visible, a:focus-visible, input:focus-visible {
-            outline: 2px solid #cba172;
-            outline-offset: 4px;
-        }
+        .platform-link { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .platform-link:hover { transform: translateY(-2px); filter: brightness(1.2); }
+        button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid #cba172; outline-offset: 4px; }
 
-        /* Reduced Motion */
-        @media (prefers-reduced-motion: reduce) {
-            .animate-spin-slow, .animate-fade-in-up, .transition-all, .transition-transform {
-                animation: none !important;
-                transition: none !important;
-                transform: none !important;
-            }
-        }
-        
-        .animate-fade-in-up {
-            animation: fadeInUp 0.8s ease-out forwards;
-        }
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* Animations */
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Sticky Player Transition */
-        #sticky-player {
-            transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        #sticky-player.visible {
-            transform: translateY(0);
-        }
+        #sticky-player { transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        #sticky-player.visible { transform: translateY(0); }
 
         /* Loading Spinner */
         .loader {
@@ -161,29 +130,78 @@
         }
 
         /* Lightbox */
-        #lightbox {
-            transition: opacity 0.3s ease;
-        }
-        #lightbox.open {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        #lightbox { transition: opacity 0.3s ease; }
+        #lightbox.open { opacity: 1; pointer-events: auto; }
 
         /* Nav Active State */
-        .nav-link.active {
-            color: #cba172;
-            font-weight: 600;
-        }
+        .nav-link.active { color: #cba172; font-weight: 600; }
         
         /* Tap Targets Mobile */
         @media (max-width: 640px) {
-            .tap-target {
-                min-height: 48px;
-                min-width: 48px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
+            .tap-target { min-height: 48px; min-width: 48px; display: flex; align-items: center; justify-content: center; }
+        }
+
+        /* --- Spotify-like Custom Range Slider --- */
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100px; /* Reduced width for better fit */
+        }
+        .volume-slider-wrapper {
+            position: relative;
+            width: 100%;
+            height: 20px;
+            display: flex;
+            align-items: center;
+        }
+        /* The Range Input */
+        .volume-range {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.2); /* Fallback bg */
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
+        }
+        /* Slider Thumb (Handle) - Webkit */
+        .volume-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin-top: -4px; /* Center it */
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        /* Slider Thumb (Handle) - Firefox */
+        .volume-range::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        /* Hover States for Handle */
+        .volume-container:hover .volume-range::-webkit-slider-thumb { opacity: 1; }
+        .volume-container:hover .volume-range::-moz-range-thumb { opacity: 1; }
+        .volume-range:active::-webkit-slider-thumb { transform: scale(1.1); }
+
+        /* Track color is handled via JS background linear-gradient for the 'fill' effect */
+        .volume-range:hover {
+            /* Handled in JS to brighten the fill color on hover if desired, 
+               but CSS hover brightness on the container is usually enough */
         }
     </style>
 </head>
@@ -388,13 +406,12 @@
 
                 <!-- Premium Volume Control -->
                 <div class="volume-container group">
+                    <button onclick="AudioController.toggleMute()" class="w-6 flex items-center justify-center text-gray-400 hover:text-white transition-colors focus:outline-none tap-target" aria-label="Toggle Mute" title="Mute (M)">
+                        <i id="volume-icon" class="fas fa-volume-up"></i>
+                    </button>
                     <div class="volume-slider-wrapper">
                         <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" class="volume-range" oninput="AudioController.setVolume(this.value)" aria-label="Volume Control">
                     </div>
-                    
-                    <button onclick="AudioController.toggleMute()" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-white transition-colors focus:outline-none tap-target" aria-label="Toggle Mute" title="Mute (M)">
-                        <i id="volume-icon" class="fas fa-volume-up"></i>
-                    </button>
                 </div>
             </div>
         </div>
@@ -519,7 +536,8 @@
                 const audio = new Audio();
                 audio.crossOrigin = "anonymous"; 
                 audio.src = url;
-                audio.preload = 'metadata'; // Lazy load actual data
+                // Faster Loading: set preload to auto and use MediaElement backend
+                audio.preload = 'auto'; 
                 audio.volume = this.volume;
 
                 const ws = WaveSurfer.create({
@@ -682,7 +700,12 @@
             updateVolumeUI() {
                 const slider = document.getElementById('volume-slider');
                 const icon = document.getElementById('volume-icon');
-                if (slider) slider.value = this.volume;
+                if (slider) {
+                    slider.value = this.volume;
+                    // Update Background Gradient for "Fill" effect
+                    const percentage = this.volume * 100;
+                    slider.style.background = `linear-gradient(to right, #cba172 0%, #cba172 ${percentage}%, rgba(255,255,255,0.2) ${percentage}%, rgba(255,255,255,0.2) 100%)`;
+                }
                 if (icon) {
                     if (this.isMuted || this.volume === 0) icon.className = 'fas fa-volume-mute';
                     else if (this.volume < 0.5) icon.className = 'fas fa-volume-down';
@@ -781,6 +804,16 @@
                 setTimeout(() => {
                     sticky.classList.add('visible');
                 }, 10);
+            },
+            
+            // New: Preload all songs sequentially to reduce perceieved lag
+            startBackgroundLoading() {
+                songs.forEach((song, index) => {
+                    // Stagger loading by 500ms each to prevent freezing the UI
+                    setTimeout(() => {
+                         this.createWaveSurfer(song.id, song.previewUrl);
+                    }, index * 500);
+                });
             }
         };
 
@@ -946,6 +979,7 @@
 
                 container.innerHTML = songs.map((song, index) => {
                     const bgClass = colors[index % colors.length];
+                    // Using lazy loading for images but eagar loading for the very first one if it were at top (here they are below fold)
                     return `
                     <div class="glass-panel rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center md:items-start group transition-colors duration-500 card-fade-item relative overflow-hidden" data-id="${song.id}">
                         <!-- Subtle BG Blob -->
@@ -1030,7 +1064,7 @@
             },
 
             setupObservers() {
-                // Fade In Animation
+                // Fade In Animation for visual elements
                 const fadeObserver = new IntersectionObserver((entries, obs) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
@@ -1042,22 +1076,6 @@
                 
                 document.querySelectorAll('.card-fade-item').forEach(el => fadeObserver.observe(el));
                 document.querySelectorAll('#featured > *').forEach(el => fadeObserver.observe(el));
-
-                // Lazy Audio Initialization
-                const audioObserver = new IntersectionObserver((entries, obs) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const id = parseInt(entry.target.getAttribute('data-id'));
-                            const song = songs.find(s => s.id === id);
-                            if (song) {
-                                AudioController.createWaveSurfer(id, song.previewUrl);
-                                obs.unobserve(entry.target);
-                            }
-                        }
-                    });
-                }, { rootMargin: '100px' }); // Init when 100px away
-
-                document.querySelectorAll('.card-fade-item').forEach(el => audioObserver.observe(el));
             }
         };
 
@@ -1065,6 +1083,12 @@
         document.addEventListener('DOMContentLoaded', () => {
             AudioController.init();
             UI.init();
+            
+            // Start loading audio in background immediately so it's ready when user scrolls
+            // Wait 1s for initial paint to finish
+            setTimeout(() => {
+                AudioController.startBackgroundLoading();
+            }, 1000);
         });
 
     </script>
