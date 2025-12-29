@@ -2,7 +2,7 @@
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Otter Music | Soundscapes</title>
     
     <!-- Website Favicon -->
@@ -32,15 +32,19 @@
                     },
                     colors: {
                         'otter-dark': '#0f0e13',
-                        'otter-card': '#16151a', 
+                        'otter-card': '#16151a', /* Slightly darker for better contrast */
                         'otter-accent': '#cba172',
                         'otter-accent-hover': '#e0b686',
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
                     },
                     screens: {
                         'xs': '480px',
                     },
                     animation: {
                         'spin-slow': 'spin-slow 8s linear infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     }
                 }
             }
@@ -48,22 +52,17 @@
     </script>
 
     <style>
-        /* Base Setup */
-        body { 
-            -webkit-tap-highlight-color: transparent; 
-            overscroll-behavior-y: none; /* Prevent rubber-banding on pull-to-refresh styles */
-        }
-
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f0e13; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #cba172; }
 
+        /* Hide scrollbar for nav horizontal scrolling */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Vinyl Animation */
+        /* Vinyl Spin Animation with Easing */
         @keyframes spin-slow {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
@@ -71,14 +70,10 @@
         .animate-spin-slow {
             animation: spin-slow 8s linear infinite;
         }
-        /* Disable spin on low power or reduced motion preferences */
-        @media (prefers-reduced-motion: reduce) {
-            .animate-spin-slow { animation: none; }
-        }
-
         .paused-spin {
             animation-play-state: paused;
-            filter: brightness(0.7) grayscale(0.4);
+            /* Dim vinyl when paused */
+            filter: brightness(0.7) grayscale(0.3);
             transition: filter 0.5s ease;
         }
         .playing-spin {
@@ -86,773 +81,992 @@
             transition: filter 0.5s ease;
         }
 
-        /* Glassmorphism - Simplified for Mobile */
+        /* Glassmorphism Utilities - Refined for Performance & Visuals */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.02);
+            /* Reduced blur for performance and visual clarity in lists */
+            backdrop-filter: blur(8px); 
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2); 
         }
-        /* Only apply heavy blur on larger screens */
-        @media (min-width: 768px) {
-            .glass-panel { backdrop-filter: blur(12px); }
-        }
-
         .glass-nav {
-            background: rgba(15, 14, 19, 0.95);
+            background: rgba(15, 14, 19, 0.9);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.3s ease-in-out, background-color 0.3s;
         }
-
-        /* Sticky Player - Expanded vs Collapsed */
         .glass-sticky {
             background: rgba(20, 19, 24, 0.98);
             border-top: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 -4px 30px rgba(0,0,0,0.5);
-            transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease;
-            touch-action: none; /* Crucial for gesture handling */
+            box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
         }
 
-        /* Touch Targets */
-        .tap-target {
-            min-height: 56px;
-            min-width: 56px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+        /* Hover & Focus Effects */
+        .platform-link {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .tap-target-sm {
-            min-height: 48px;
-            min-width: 48px;
+        .platform-link:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.2);
         }
-
-        /* Volume Range Styling */
-        input[type=range].volume-range {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 40px; /* Big touch area */
-            background: transparent;
-        }
-        input[type=range].volume-range::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 2px;
-        }
-        input[type=range].volume-range::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 16px;
-            width: 16px;
-            border-radius: 50%;
-            background: #fff;
-            margin-top: -6px;
+        /* High Visibility Focus for Accessibility */
+        button:focus-visible, a:focus-visible, input:focus-visible {
+            outline: 2px solid #cba172;
+            outline-offset: 4px;
         }
 
-        /* Animations */
-        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            .animate-spin-slow, .animate-fade-in-up, .transition-all, .transition-transform {
+                animation: none !important;
+                transition: none !important;
+                transform: none !important;
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Sticky Player Transition */
+        #sticky-player {
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #sticky-player.visible {
+            transform: translateY(0);
+        }
+
+        /* Loading Spinner */
         .loader {
-            border: 3px solid rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.1);
             border-left-color: #cba172;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             animation: spin 1s linear infinite;
         }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Helpers */
+        /* Clamping */
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        .modal-open { overflow: hidden; }
 
-        /* Expanded Player Styles */
-        .expanded-player {
-            height: 100vh !important;
-            flex-direction: column;
-            justify-content: center;
-            padding-top: 60px;
-            background: #0f0e13;
+        /* Lightbox */
+        #lightbox {
+            transition: opacity 0.3s ease;
         }
-        .expanded-content {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            animation: fadeIn 0.3s ease;
+        #lightbox.open {
+            opacity: 1;
+            pointer-events: auto;
         }
-        .expanded-player .expanded-content { display: flex; }
-        .expanded-player .collapsed-content { display: none; }
-        .expanded-player .drag-handle { background: rgba(255,255,255,0.3); }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Nav Active State */
+        .nav-link.active {
+            color: #cba172;
+            font-weight: 600;
+        }
+        
+        /* Tap Targets Mobile */
+        @media (max-width: 640px) {
+            .tap-target {
+                min-height: 48px;
+                min-width: 48px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
-<body class="bg-otter-dark text-gray-200 font-sans selection:bg-otter-accent selection:text-black antialiased pb-32">
+<body class="bg-otter-dark text-gray-200 font-sans selection:bg-otter-accent selection:text-black antialiased overflow-x-hidden pb-24">
 
-    <!-- ARIA Live Region -->
+    <!-- ARIA Live Region for Announcements -->
     <div id="a11y-announcer" class="sr-only" aria-live="polite"></div>
-
-    <!-- Back to Top Button -->
-    <button id="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="fixed bottom-24 right-6 z-40 w-12 h-12 rounded-full bg-otter-accent text-otter-dark shadow-lg translate-y-20 opacity-0 transition-all duration-300 flex items-center justify-center font-bold tap-target" aria-label="Back to Top">
-        <i class="fas fa-arrow-up"></i>
-    </button>
 
     <!-- Navbar -->
     <nav class="fixed top-0 w-full z-50 glass-nav" id="navbar">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="#" class="flex items-center gap-3 tap-target-sm" aria-label="Otter Music Home">
-                <div class="w-10 h-10 rounded-full overflow-hidden border border-otter-accent/40">
-                    <img src="https://i.postimg.cc/Hsfv2Lb4/logo.png" alt="" class="w-full h-full object-cover">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+            <!-- Logo Section -->
+            <a href="#" class="flex items-center gap-3 group z-20 shrink-0 p-1" aria-label="Otter Music Home">
+                <div class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-otter-accent/40 group-hover:border-otter-accent transition-colors shadow-lg shadow-otter-accent/10">
+                    <img src="https://i.postimg.cc/Hsfv2Lb4/logo.png" alt="" class="w-full h-full object-cover" aria-hidden="true">
                 </div>
-                <span class="font-display font-bold text-lg hidden xs:block text-white">Otter Music</span>
+                <span class="font-display font-bold text-lg sm:text-xl tracking-tight text-white group-hover:text-otter-accent transition-colors hidden xs:block">Otter Music</span>
             </a>
             
-            <div class="flex items-center gap-2 sm:gap-6 text-sm font-medium">
-                <a href="#featured" class="tap-target-sm px-2 hover:text-otter-accent transition-colors nav-link">Featured</a>
-                <a href="#discography" class="tap-target-sm px-2 hover:text-otter-accent transition-colors nav-link">Music</a>
-                <button onclick="UI.openProfile()" class="ml-2 px-6 py-2 rounded-full border border-otter-accent/30 bg-otter-accent/5 text-otter-accent font-bold uppercase tracking-wider text-xs tap-target-sm active:bg-otter-accent active:text-black transition-all">
+            <!-- Menu -->
+            <div class="flex items-center gap-4 sm:gap-8 text-sm font-medium tracking-wide overflow-x-auto no-scrollbar ml-auto">
+                <a href="#featured" class="nav-link hover:text-otter-accent transition-colors whitespace-nowrap py-2 px-1">Featured</a>
+                <a href="#discography" class="nav-link hover:text-otter-accent transition-colors whitespace-nowrap py-2 px-1">Discography</a>
+                <a href="#about" class="nav-link hover:text-otter-accent transition-colors whitespace-nowrap py-2 px-1">About</a>
+                <button onclick="UI.openProfile()" class="px-5 py-2 rounded-full border border-otter-accent/30 hover:bg-otter-accent/10 hover:border-otter-accent text-otter-accent transition-all whitespace-nowrap text-xs font-bold uppercase tracking-wider">
                     Profile
                 </button>
             </div>
         </div>
     </nav>
 
-    <!-- Lightbox -->
-    <div id="lightbox" class="fixed inset-0 z-[200] bg-black/95 opacity-0 pointer-events-none flex items-center justify-center p-4 transition-opacity duration-300">
-        <button onclick="UI.closeLightbox()" class="absolute top-4 right-4 text-white/70 hover:text-white tap-target text-4xl">
+    <!-- Lightbox Overlay -->
+    <div id="lightbox" class="fixed inset-0 z-[200] bg-black/95 opacity-0 pointer-events-none flex items-center justify-center p-4">
+        <button onclick="UI.closeLightbox()" class="absolute top-6 right-6 text-white/50 hover:text-white tap-target text-3xl transition-colors">
             <i class="fas fa-times"></i>
         </button>
-        <img id="lightbox-img" src="" alt="Full screen" class="max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl">
+        <img id="lightbox-img" src="" alt="Full screen view" class="max-h-[90vh] max-w-full object-contain rounded-md shadow-2xl">
     </div>
 
-    <!-- Email Modal -->
-    <div id="email-modal" class="fixed inset-0 z-[120] bg-black/90 backdrop-blur-sm hidden flex items-center justify-center p-4 opacity-0 transition-all duration-300">
-        <div class="bg-otter-card border border-white/10 rounded-2xl p-6 w-full max-w-sm text-center relative transform scale-95 shadow-2xl" id="email-modal-content">
-            <button onclick="UI.closeEmailModal()" class="absolute top-2 right-2 text-gray-400 hover:text-white tap-target" aria-label="Close">
-                <i class="fas fa-times text-xl"></i>
+    <!-- Email Choice Modal -->
+    <div id="email-modal" class="fixed inset-0 z-[120] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="bg-otter-card border border-white/10 rounded-2xl p-8 max-w-sm w-full text-center relative transform scale-95 transition-all duration-300 shadow-[0_0_50px_rgba(203,161,114,0.15)]" id="email-modal-content">
+            <button onclick="UI.closeEmailModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 tap-target" aria-label="Close Modal">
+                <i class="fas fa-times" aria-hidden="true"></i>
             </button>
-            <h3 class="font-display text-2xl font-bold text-white mb-6">Contact</h3>
-            <div class="flex flex-col gap-4">
-                 <a href="mailto:lalitachoudhuri18@gmail.com" class="tap-target w-full rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white font-medium">
-                    Default App
+            <div class="w-16 h-16 rounded-full bg-white/5 mx-auto flex items-center justify-center mb-6 text-otter-accent border border-white/10">
+                <i class="fas fa-envelope text-2xl" aria-hidden="true"></i>
+            </div>
+            <h3 id="modal-title" class="font-display text-2xl font-bold text-white mb-2">Contact Me</h3>
+            <p class="text-gray-400 text-sm mb-6">Choose your preferred mail app</p>
+            <div class="space-y-3">
+                 <a href="mailto:lalitachoudhuri18@gmail.com" class="flex items-center justify-center w-full py-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium transition-all hover:scale-[1.02] group tap-target">
+                    <span class="group-hover:text-otter-accent transition-colors">Default App</span>
                 </a>
-                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=lalitachoudhuri18@gmail.com" target="_blank" class="tap-target w-full rounded-xl bg-[#EA4335] text-white font-medium shadow-lg">
-                    <i class="fab fa-google mr-3"></i> Gmail
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=lalitachoudhuri18@gmail.com" target="_blank" class="flex items-center justify-center w-full py-3.5 rounded-xl bg-[#EA4335] hover:bg-[#d93025] text-white font-medium transition-all hover:scale-[1.02] shadow-lg shadow-red-900/20 tap-target">
+                    <i class="fab fa-google mr-2" aria-hidden="true"></i> Gmail
+                </a>
+                <a href="https://outlook.live.com/owa/?path=/mail/action/compose&to=lalitachoudhuri18@gmail.com" target="_blank" class="flex items-center justify-center w-full py-3.5 rounded-xl bg-[#0078D4] hover:bg-[#005a9e] text-white font-medium transition-all hover:scale-[1.02] shadow-lg shadow-blue-900/20 tap-target">
+                    <i class="fab fa-microsoft mr-2" aria-hidden="true"></i> Outlook
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- Profile Overlay -->
-    <div id="profile-view" class="fixed inset-0 z-[100] bg-otter-dark text-white translate-x-full transition-transform duration-300 overflow-y-auto outline-none touch-pan-y" tabindex="-1">
-        <div class="fixed top-0 left-0 w-full h-16 z-50 flex items-center justify-between px-6 bg-otter-dark/90 backdrop-blur-md border-b border-white/5">
-            <span class="font-display font-bold text-lg">Profile</span>
-            <button onclick="UI.closeProfile()" class="tap-target text-white" aria-label="Close Profile">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        
-        <div class="min-h-screen pt-24 pb-12 px-6 flex flex-col items-center">
-            <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-otter-accent/20 mb-6 shadow-xl">
-                <img src="https://i.postimg.cc/sxm2926S/image-4-0.png" alt="Otter" class="w-full h-full object-cover" loading="lazy">
+    <!-- Profile Overlay Section -->
+    <div id="profile-view" class="fixed inset-0 z-[100] bg-otter-dark text-white translate-x-full transition-transform duration-500 overflow-y-auto outline-none" role="dialog" aria-modal="true" aria-label="Artist Profile" tabindex="-1">
+        <button onclick="UI.closeProfile()" class="fixed top-6 right-6 z-50 w-12 h-12 rounded-full bg-white/5 hover:bg-otter-accent hover:text-black flex items-center justify-center transition-all border border-white/10 backdrop-blur-md tap-target" aria-label="Close Profile">
+            <i class="fas fa-times text-xl" aria-hidden="true"></i>
+        </button>
+        <div class="min-h-screen flex flex-col items-center justify-center p-6 relative">
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <div class="absolute top-1/4 right-1/4 w-96 h-96 bg-otter-accent/5 rounded-full blur-[100px]"></div>
+                <div class="absolute bottom-1/4 left-1/4 w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[100px]"></div>
             </div>
-            <h2 class="font-display text-3xl font-bold mb-1">Hreeshyat Talukdar</h2>
-            <p class="text-otter-accent tracking-widest uppercase text-sm mb-8">Artist: Otter</p>
-            
-            <div class="space-y-6 text-gray-300 font-light leading-relaxed max-w-2xl text-center md:text-lg">
-                <p>Independent artist from Assam, India. Blending modern pop textures with cinematic atmospheres.</p>
-                <p>Uses tools like <span class="text-white">Suno AI</span> & <span class="text-white">ElevenLabs</span> to sketch ideas, then refines them into emotional soundscapes.</p>
-            </div>
-
-            <div class="w-full max-w-3xl mt-10">
-                <h4 class="font-display text-xl font-bold mb-4 border-b border-white/10 pb-2">Gallery</h4>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/sxm2926S/image-4-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 active:opacity-80 transition-opacity">
-                         <img src="https://i.postimg.cc/sxm2926S/image-4-0.png" alt="Gallery 1" class="w-full h-full object-cover" loading="lazy">
-                    </button>
-                    <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/1X3SSrBy/image-5-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 active:opacity-80 transition-opacity">
-                         <img src="https://i.postimg.cc/1X3SSrBy/image-5-0.png" alt="Gallery 2" class="w-full h-full object-cover" loading="lazy">
-                    </button>
+            <div class="max-w-3xl mx-auto relative z-10 text-center py-20">
+                <div class="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-otter-accent/20 mb-8 shadow-[0_0_30px_rgba(203,161,114,0.15)]">
+                    <img src="https://i.postimg.cc/sxm2926S/image-4-0.png" alt="Otter" class="w-full h-full object-cover" loading="lazy">
+                </div>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">Hreeshyat Talukdar</h2>
+                <h3 class="font-sans text-otter-accent text-xl tracking-widest uppercase mb-10">Stage Identity: Otter</h3>
+                <div class="space-y-8 text-lg md:text-xl text-gray-300 font-light leading-relaxed">
+                    <p class="glass-panel p-8 rounded-2xl border-l-4 border-otter-accent text-left">
+                        Hreeshyat Talukdar (Otter) is a 19-year-old independent artist from Assam, India, exploring the edge where emotion meets technology. Blending modern pop textures with cinematic atmospheres and catchy hooks, he creates fresh releases that feel both futuristic and personal.
+                    </p>
+                    <p class="text-left">
+                        Working with AI-powered tools like <span class="text-white font-medium">Suno AI</span> and <span class="text-white font-medium">ElevenLabs</span> as part of his creative process, Hreeshyat shapes ideas into full tracks—then refines them with an artist’s ear for mood, pacing, and replay value.
+                    </p>
+                    <p class="text-gray-400 italic text-left">
+                        With each new release, he’s building a sound that’s curious, bold, and unmistakably his own.
+                    </p>
+                </div>
+                <div class="w-full mt-12 mb-8">
+                    <h4 class="text-left text-white font-display text-2xl font-bold mb-6 border-b border-white/10 pb-2">Gallery</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/sxm2926S/image-4-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.02] transition-transform duration-300 border border-white/5 group shadow-lg cursor-zoom-in">
+                             <img src="https://i.postimg.cc/sxm2926S/image-4-0.png" alt="Gallery 1" class="w-full h-full object-cover group-hover:brightness-110 transition-all" loading="lazy">
+                        </button>
+                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/1X3SSrBy/image-5-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.02] transition-transform duration-300 border border-white/5 group shadow-lg cursor-zoom-in">
+                             <img src="https://i.postimg.cc/1X3SSrBy/image-5-0.png" alt="Gallery 2" class="w-full h-full object-cover group-hover:brightness-110 transition-all" loading="lazy">
+                        </button>
+                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/hPwnFx7Z/image-3-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.02] transition-transform duration-300 border border-white/5 group shadow-lg cursor-zoom-in">
+                             <img src="https://i.postimg.cc/hPwnFx7Z/image-3-0.png" alt="Gallery 3" class="w-full h-full object-cover group-hover:brightness-110 transition-all" loading="lazy">
+                        </button>
+                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/TwC8tW6z/image-2-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.02] transition-transform duration-300 border border-white/5 group shadow-lg cursor-zoom-in">
+                             <img src="https://i.postimg.cc/TwC8tW6z/image-2-0.png" alt="Gallery 4" class="w-full h-full object-cover group-hover:brightness-110 transition-all" loading="lazy">
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-12 flex justify-center gap-6 flex-wrap">
+                    <a href="https://www.instagram.com/hrees_tal_official/" target="_blank" class="px-8 py-3 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all flex items-center gap-2 tap-target" aria-label="Instagram">
+                        <i class="fab fa-instagram" aria-hidden="true"></i>
+                    </a>
+                    <a href="https://open.spotify.com/artist/7s2q30BhMkSui7m3p8n03t?si=GGaRHcR2SJuwzUZsn52Wng" target="_blank" class="px-8 py-3 rounded-full bg-white/5 hover:bg-[#1DB954] hover:text-white border border-white/10 transition-all flex items-center gap-2 tap-target" aria-label="Spotify">
+                        <i class="fab fa-spotify" aria-hidden="true"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@ottermusicind" target="_blank" class="px-8 py-3 rounded-full bg-otter-accent text-otter-dark font-bold hover:scale-105 transition-all flex items-center gap-2 tap-target" aria-label="YouTube">
+                        <i class="fab fa-youtube" aria-hidden="true"></i>
+                    </a>
                 </div>
             </div>
-
-            <div class="mt-12 flex justify-center gap-4 w-full max-w-sm">
-                <a href="https://open.spotify.com/artist/7s2q30BhMkSui7m3p8n03t" target="_blank" class="flex-1 tap-target rounded-full bg-[#1DB954] text-black font-bold shadow-lg">
-                    <i class="fab fa-spotify mr-2"></i> Spotify
-                </a>
-                <a href="https://www.youtube.com/@ottermusicind" target="_blank" class="flex-1 tap-target rounded-full bg-[#FF0000] text-white font-bold shadow-lg">
-                    <i class="fab fa-youtube mr-2"></i> YouTube
-                </a>
-            </div>
         </div>
     </div>
 
-    <!-- Hero -->
-    <header class="relative min-h-[90vh] flex items-center justify-center px-4 overflow-hidden pt-16">
+    <!-- Hero Section -->
+    <header class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden px-4">
         <div class="absolute inset-0 bg-otter-dark">
-            <div class="absolute top-10 left-10 w-64 h-64 bg-otter-accent/10 rounded-full blur-[80px]"></div>
-            <div class="absolute bottom-10 right-10 w-72 h-72 bg-purple-900/10 rounded-full blur-[80px]"></div>
+            <div class="absolute top-0 left-1/4 w-96 h-96 bg-otter-accent/10 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[120px]"></div>
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
         </div>
-        <div class="relative z-10 text-center max-w-4xl" id="featured">
-            <h1 class="font-display text-5xl md:text-8xl font-bold text-white mb-6 leading-tight opacity-0 animate-fade-in-up" style="animation-delay: 0.1s;">
-                Music for <br/><span class="text-otter-accent">Moments</span>
+        <div class="relative z-10 text-center max-w-4xl mx-auto" id="featured">
+            <h1 class="font-display text-5xl md:text-8xl font-bold text-white mb-8 leading-tight opacity-0 animate-fade-in-up" style="animation-delay: 0.4s; animation-fill-mode: forwards;">
+                Music for every <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-otter-accent to-white">moment</span>
             </h1>
-            <p class="text-lg text-gray-400 mb-10 max-w-md mx-auto opacity-0 animate-fade-in-up" style="animation-delay: 0.3s;">
-                Built for deep listeners. Crafted for ears that care.
+            <p class="text-base md:text-lg text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed opacity-0 animate-fade-in-up" style="animation-delay: 0.6s; animation-fill-mode: forwards;">
+                Redefining the auditory experience. Built for the deep listeners. Crafted for ears that care
             </p>
-            <a href="#discography" class="inline-flex tap-target px-12 rounded-full bg-otter-accent text-otter-dark font-bold text-lg shadow-[0_0_20px_rgba(203,161,114,0.4)] opacity-0 animate-fade-in-up" style="animation-delay: 0.5s;">
-                Listen Now
-            </a>
+            <div class="flex flex-col md:flex-row items-center justify-center gap-4 opacity-0 animate-fade-in-up" style="animation-delay: 0.8s; animation-fill-mode: forwards;">
+                <a href="#discography" class="px-10 py-4 bg-otter-accent text-otter-dark font-bold rounded-full hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(203,161,114,0.3)] tap-target">
+                    Listen Now
+                </a>
+            </div>
         </div>
     </header>
 
-    <!-- Discography -->
-    <section id="discography" class="py-16 md:py-24 relative">
-        <div class="max-w-5xl mx-auto px-4">
-            <h2 class="font-display text-4xl font-bold mb-12 text-center text-white">The Collection</h2>
-            <div class="grid gap-12 md:gap-8" id="song-container"></div>
+    <!-- Discography / Songs Section -->
+    <section id="discography" class="py-24 relative">
+        <div class="max-w-6xl mx-auto px-4 md:px-6">
+            <h2 class="font-display text-4xl md:text-5xl font-bold mb-16 text-center">
+                <span class="border-b-2 border-otter-accent pb-2">The Collection</span>
+            </h2>
+            <div class="grid gap-6" id="song-container"></div>
         </div>
     </section>
 
-    <!-- Sticky Player -->
-    <div id="sticky-player" class="fixed bottom-0 left-0 w-full glass-sticky z-[90] h-20 transform translate-y-full transition-transform duration-300 flex flex-col hidden">
-        
-        <!-- Drag Handle (Visual indicator) -->
-        <div class="w-full flex justify-center py-2 cursor-grab active:cursor-grabbing" id="sticky-drag-handle">
-            <div class="w-12 h-1.5 bg-white/20 rounded-full drag-handle"></div>
-        </div>
-
-        <!-- Collapsed Content -->
-        <div class="collapsed-content w-full px-4 flex items-center justify-between h-full pb-2">
-            <div class="flex items-center gap-3 w-1/3 overflow-hidden cursor-pointer" onclick="UI.toggleExpandedPlayer(true)">
-                <img id="sticky-cover" src="" class="w-12 h-12 rounded-lg bg-gray-800 object-cover shrink-0">
-                <div class="flex flex-col overflow-hidden">
-                    <span id="sticky-title" class="text-white font-bold text-sm truncate">Select Song</span>
-                    <span class="text-otter-accent text-xs truncate">Otter</span>
+    <!-- Sticky Mini Player -->
+    <div id="sticky-player" class="fixed bottom-0 left-0 w-full glass-sticky z-[90] p-4 hidden">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <!-- Left: Info -->
+            <div class="flex items-center gap-3 w-1/4 min-w-[120px] group cursor-default">
+                <img id="sticky-cover" src="" alt="" class="w-12 h-12 rounded-lg object-cover bg-gray-800" loading="lazy">
+                <div class="hidden sm:block overflow-hidden">
+                    <h4 id="sticky-title" class="font-display font-bold text-white text-sm truncate">Select a song</h4>
+                    <p id="sticky-artist" class="text-xs text-otter-accent truncate">Otter</p>
+                </div>
+                
+                <!-- Tooltip -->
+                <div class="absolute bottom-full left-4 mb-2 px-2 py-1 bg-black/80 text-xs text-white rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                    Now Playing
                 </div>
             </div>
-
-            <div class="flex items-center justify-center gap-4 flex-1">
-                <button onclick="AudioController.togglePlay()" id="sticky-play-btn" class="tap-target w-12 h-12 rounded-full bg-white text-black text-xl shadow-lg relative">
-                    <i class="fas fa-play ml-1"></i>
-                </button>
-            </div>
-
-            <div class="w-1/3 flex justify-end">
-                <button onclick="UI.toggleExpandedPlayer(true)" class="tap-target-sm text-gray-400">
-                    <i class="fas fa-chevron-up"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Progress Bar (Sticky bottom) -->
-        <div class="collapsed-content absolute bottom-0 left-0 w-full h-1 bg-white/10">
-            <div id="sticky-progress-bar" class="h-full bg-otter-accent w-0 transition-all duration-100 ease-linear"></div>
-        </div>
-
-        <!-- Expanded Content (Hidden by default) -->
-        <div class="expanded-content flex-1 px-8 pb-10 overflow-y-auto">
-            <div class="w-full flex justify-between items-center mb-8">
-                <button onclick="UI.toggleExpandedPlayer(false)" class="tap-target text-white/50 hover:text-white">
-                    <i class="fas fa-chevron-down text-2xl"></i>
-                </button>
-                <span class="text-xs tracking-widest uppercase text-white/50">Now Playing</span>
-                <button onclick="AudioController.toggleMute()" class="tap-target text-white/50 hover:text-white">
-                    <i id="expanded-mute-icon" class="fas fa-volume-up text-xl"></i>
-                </button>
-            </div>
-
-            <div class="w-full aspect-square max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl mb-8 border border-white/10">
-                <img id="expanded-cover" src="" class="w-full h-full object-cover">
-            </div>
-
-            <div class="text-center mb-8">
-                <h2 id="expanded-title" class="font-display text-3xl font-bold text-white mb-2">Song Title</h2>
-                <p id="expanded-artist" class="text-otter-accent text-lg">Otter</p>
-            </div>
-
-            <!-- Scrubber -->
-            <div class="w-full mb-8 group" id="scrubber-container">
-                <div class="w-full h-12 flex items-center cursor-pointer" onclick="AudioController.seekFromExpanded(event)">
-                    <div class="w-full h-2 bg-white/10 rounded-full relative overflow-hidden">
-                        <div id="expanded-progress" class="absolute top-0 left-0 h-full bg-otter-accent w-0"></div>
+            
+            <!-- Center: Controls -->
+            <div class="flex-grow max-w-xl flex flex-col items-center gap-1">
+                <div class="flex items-center gap-6">
+                    <button onclick="AudioController.skip(-5)" class="text-gray-400 hover:text-white transition-colors p-2 tap-target" aria-label="Rewind 5s" title="Rewind 5s">
+                        <i class="fas fa-backward"></i>
+                    </button>
+                    <button id="sticky-play-btn" onclick="AudioController.togglePlay()" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-otter-accent transition-colors tap-target relative" aria-label="Play/Pause" title="Play/Pause (Space)">
+                        <i class="fas fa-play ml-1"></i>
+                    </button>
+                    <button onclick="AudioController.skip(5)" class="text-gray-400 hover:text-white transition-colors p-2 tap-target" aria-label="Forward 5s" title="Forward 5s">
+                        <i class="fas fa-forward"></i>
+                    </button>
+                </div>
+                <!-- Mini Progress for Sticky -->
+                 <div class="w-full flex items-center gap-2 text-[10px] text-gray-400 font-mono group/progress cursor-pointer" onclick="AudioController.seekFromSticky(event)">
+                    <span id="sticky-time-current">0:00</span>
+                    <div class="relative flex-grow h-1.5 bg-white/10 rounded-full overflow-hidden hover:h-2 transition-all">
+                        <div id="sticky-progress-bar" class="absolute top-0 left-0 h-full bg-otter-accent w-0 transition-all duration-100 ease-linear"></div>
                     </div>
-                </div>
-                <div class="flex justify-between text-xs text-gray-500 font-mono -mt-2">
-                    <span id="expanded-time-current">0:00</span>
-                    <span id="expanded-time-total">0:00</span>
+                    <span id="sticky-time-total">0:00</span>
                 </div>
             </div>
 
-            <!-- Controls -->
-            <div class="flex items-center justify-center gap-8 mb-10">
-                <button onclick="AudioController.skip(-5)" class="tap-target text-3xl text-gray-400 hover:text-white">
-                    <i class="fas fa-backward-step"></i>
-                </button>
-                <button onclick="AudioController.togglePlay()" id="expanded-play-btn" class="w-20 h-20 rounded-full bg-otter-accent text-black text-3xl flex items-center justify-center shadow-[0_0_30px_rgba(203,161,114,0.3)] active:scale-95 transition-transform">
-                    <i class="fas fa-play ml-2"></i>
-                </button>
-                <button onclick="AudioController.skip(5)" class="tap-target text-3xl text-gray-400 hover:text-white">
-                    <i class="fas fa-forward-step"></i>
-                </button>
-            </div>
+            <!-- Right: Volume/Misc -->
+            <div class="w-1/4 flex justify-end items-center gap-2">
+                <!-- Hint -->
+                 <div class="hidden lg:block text-[10px] text-gray-500 mr-2 border border-white/10 px-2 py-0.5 rounded">
+                    Space / M
+                 </div>
 
-            <!-- Volume Slider -->
-            <div class="w-full max-w-xs mx-auto flex items-center gap-4 bg-white/5 px-4 py-2 rounded-full">
-                <i class="fas fa-volume-down text-gray-500 text-xs"></i>
-                <input type="range" id="expanded-volume" min="0" max="1" step="0.05" class="volume-range flex-1" oninput="AudioController.setVolume(this.value)">
-                <i class="fas fa-volume-up text-gray-500 text-xs"></i>
+                <!-- Premium Volume Control -->
+                <div class="volume-container group">
+                    <div class="volume-slider-wrapper">
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" class="volume-range" oninput="AudioController.setVolume(this.value)" aria-label="Volume Control">
+                    </div>
+                    
+                    <button onclick="AudioController.toggleMute()" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-white transition-colors focus:outline-none tap-target" aria-label="Toggle Mute" title="Mute (M)">
+                        <i id="volume-icon" class="fas fa-volume-up"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="bg-black/50 border-t border-white/5 pt-16 pb-12 mt-12">
-        <div class="max-w-7xl mx-auto px-6 text-center">
-            <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-otter-accent/20 mx-auto mb-6">
-                <img src="https://i.postimg.cc/Hsfv2Lb4/logo.png" alt="Logo" class="w-full h-full object-cover grayscale" loading="lazy">
+    <footer id="about" class="bg-black/50 border-t border-white/5 pt-20 pb-10">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
+            <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-otter-accent/30 mb-8">
+                <img src="https://i.postimg.cc/Hsfv2Lb4/logo.png" alt="Logo" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" loading="lazy">
             </div>
-            <p class="text-gray-500 text-sm mb-8 max-w-md mx-auto">
-                Exploration, fun, and controlled chaos.
+            <h3 class="font-display text-2xl font-bold text-white mb-4">Otter Music</h3>
+            <p class="text-gray-400 max-w-2xl mb-8 leading-relaxed font-light px-4">
+                Otter Music is not about perfection — it’s about exploration, fun, and pushing creative boundaries. If you enjoy discovering unique sounds, futuristic melodies, and a bit of controlled chaos, you’re in the right place.
             </p>
-            <div class="flex justify-center gap-8 text-2xl text-white/50">
-                <a href="#" class="tap-target hover:text-white"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="tap-target hover:text-white"><i class="fab fa-youtube"></i></a>
+            <div class="flex gap-6 mb-12">
+                <a href="https://www.instagram.com/hrees_tal_official/" target="_blank" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-gradient-to-tr hover:from-purple-500 hover:to-pink-500 hover:text-white transition-all text-white/70 tap-target" aria-label="Instagram">
+                    <i class="fab fa-instagram" aria-hidden="true"></i>
+                </a>
+                <a href="https://www.youtube.com/@ottermusicind" target="_blank" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#FF0000] hover:text-white transition-all text-white/70 tap-target" aria-label="YouTube">
+                    <i class="fab fa-youtube" aria-hidden="true"></i>
+                </a>
+                <button onclick="UI.openEmailModal()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-otter-accent hover:text-black transition-all text-white/70 tap-target" aria-label="Email">
+                    <i class="fas fa-envelope" aria-hidden="true"></i>
+                </button>
             </div>
-            <p class="text-gray-700 text-xs mt-8">&copy; 2026 Otter Music.</p>
+            <p class="text-gray-600 text-sm">&copy; 2026 Otter Music. All rights reserved.</p>
         </div>
     </footer>
 
+    <!-- Application Script -->
     <script>
-        // --- Data ---
+        // --- Data Module ---
         const songs = [
-            { id: 0, title: "Moonlight Between Us", artist: "Otter", cover: "https://i.postimg.cc/8cdmDLyJ/ab67616d00001e02ea64b5c4078aaf996009381a.jpg", releaseDate: "Dec 2025", description: "Love music blended with modern elements while maintaining classic style. A journey through connection.", spotifyUrl: "https://open.spotify.com/track/0XUNIjn6fKicoLJXbN4eYZ", youtubeUrl: "https://youtu.be/ljycK6_2Fhk", previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Moonlight%20Between%20US%20%5B30%20s%20Preview%5D.mp3", duration: "0:27" },
-            { id: 1, title: "FireFlies", artist: "Otter", cover: "https://i.postimg.cc/RFXT8DB7/Gemini-Generated-Image-bbxwwabbxwwabbxw-Photoroom.png", releaseDate: "Coming Soon", description: "Soft, natural EDM-infused hip hop with electro synths and mellow beats.", spotifyUrl: "", youtubeUrl: "", previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/FireFlies%20(%2030s%20Preview).mp3", duration: "0:29" },
-            { id: 2, title: "Keher", artist: "Otter", cover: "https://i.postimg.cc/yWC48FPK/Untitled-design.jpg", releaseDate: "Coming Soon", description: "Hindi hip-hop banger at 100 bpm with heavy 808s and aggressive synth brass.", spotifyUrl: "", youtubeUrl: "", previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Keher%20(30s%20Preview).mp3", duration: "0:28" },
-            { id: 3, title: "Titli", artist: "Otter", cover: "https://i.postimg.cc/vHH40B2m/Untitled-design.jpg", releaseDate: "Coming Soon", description: "Moody Hindi sad-love pop song blending gentle EDM pads and clean electric guitars.", spotifyUrl: "", youtubeUrl: "", previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Titli%20(%2030s%20Preview).mp3", duration: "0:47" }
+            {
+                id: 0,
+                title: "Moonlight Between Us",
+                artist: "Otter",
+                cover: "https://i.postimg.cc/8cdmDLyJ/ab67616d00001e02ea64b5c4078aaf996009381a.jpg",
+                releaseDate: "Dec 2025",
+                description: "Love music blended with modern elements while maintaining classic style. A journey through the phases of connection and distance.",
+                spotifyUrl: "https://open.spotify.com/track/0XUNIjn6fKicoLJXbN4eYZ?si=chU8tFTMRYChXdXtJsJXLw",
+                youtubeUrl: "https://youtu.be/ljycK6_2Fhk",
+                previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Moonlight%20Between%20US%20%5B30%20s%20Preview%5D.mp3",
+                duration: "0:27"
+            },
+            {
+                id: 1,
+                title: "FireFlies",
+                artist: "Otter",
+                cover: "https://i.postimg.cc/RFXT8DB7/Gemini-Generated-Image-bbxwwabbxwwabbxw-Photoroom.png",
+                releaseDate: "Releasing Soon",
+                description: "A Hindi, soft, natural edm-infused hip hop with electro synths and mellow beats, featuring soft tones and male vocals that capture the glow of the night.",
+                spotifyUrl: "",
+                youtubeUrl: "",
+                previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/FireFlies%20(%2030s%20Preview).mp3",
+                duration: "0:29"
+            },
+            {
+                id: 2,
+                title: "Keher",
+                artist: "Otter",
+                cover: "https://i.postimg.cc/yWC48FPK/Untitled-design.jpg",
+                releaseDate: "Releasing Soon",
+                description: "Hindi hip-hop/EDM banger at 100 bpm with heavy 808s, electro, big-room hook; strong, dubstep-style pre-drop, male vocals, funky slapped bass, and aggressive synth brass.",
+                spotifyUrl: "",
+                youtubeUrl: "",
+                previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Keher%20(30s%20Preview).mp3",
+                duration: "0:28"
+            },
+            {
+                id: 3,
+                title: "Titli",
+                artist: "Otter",
+                cover: "https://i.postimg.cc/vHH40B2m/Untitled-design.jpg",
+                releaseDate: "Releasing Soon",
+                description: "A moody Hindi sad-love pop song blending gentle EDM pads, soft hip hop drums, and clean electric guitar hooks; ending on a stripped, guitar-led outro.",
+                spotifyUrl: "",
+                youtubeUrl: "",
+                previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Titli%20(%2030s%20Preview).mp3",
+                duration: "0:47"
+            }
         ];
 
-        // --- Audio Controller ---
+        // --- Audio Module ---
         const AudioController = {
-            wavesurfers: {}, activeId: null, volume: 0.8, isMuted: false,
-            
+            wavesurfers: {}, 
+            activeId: null,
+            volume: 0.5, 
+            audioElement: null,
+            isMuted: false,
+            previousVolume: 0.5,
+            loadingId: null,
+
             init() {
-                // Haptic & Keyboard
-                document.addEventListener('keydown', (e) => {
-                    const tag = e.target.tagName.toLowerCase();
-                    if (tag === 'input' || tag === 'textarea') return; 
-                    if (e.code === 'Space') { e.preventDefault(); this.togglePlay(); }
-                });
+                this.setupKeyboardShortcuts();
                 this.updateVolumeUI();
             },
 
-            vibrate() {
-                if (navigator.vibrate) navigator.vibrate(10);
+            setupKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    // Check if modals are open
+                    if (document.body.classList.contains('modal-open')) return;
+                    if (document.getElementById('profile-view') && !document.getElementById('profile-view').classList.contains('translate-x-full')) return;
+
+                    const code = e.code;
+                    if (code === 'Space') { e.preventDefault(); this.togglePlay(); }
+                    else if (code === 'ArrowRight') { this.skip(5); }
+                    else if (code === 'ArrowLeft') { this.skip(-5); }
+                    else if (code === 'ArrowUp') { e.preventDefault(); this.adjustVolume(0.05); }
+                    else if (code === 'ArrowDown') { e.preventDefault(); this.adjustVolume(-0.05); }
+                    else if (code === 'KeyM') { this.toggleMute(); }
+                });
             },
 
             createWaveSurfer(id, url) {
                 if (this.wavesurfers[id]) return this.wavesurfers[id];
 
-                // Optimize for mobile: fewer bars
-                const isMobile = window.innerWidth < 640;
-                
+                const container = document.querySelector(`#waveform-${id}`);
+                if (!container) return null;
+
+                const audio = new Audio();
+                audio.crossOrigin = "anonymous"; 
+                audio.src = url;
+                audio.preload = 'metadata'; // Lazy load actual data
+                audio.volume = this.volume;
+
                 const ws = WaveSurfer.create({
-                    container: `#waveform-${id}`,
-                    url: url,
+                    container: container,
+                    media: audio,
                     waveColor: '#4b5563',
                     progressColor: '#cba172',
-                    barWidth: isMobile ? 3 : 2,
-                    barGap: isMobile ? 4 : 3,
+                    cursorColor: '#ffffff',
+                    barWidth: 2,
                     barRadius: 3,
                     cursorWidth: 0,
-                    height: isMobile ? 40 : 48,
-                    normalize: true,
+                    height: 48,
+                    barGap: 3,
+                    responsive: true,
+                    fillParent: true,
                     hideScrollbar: true,
-                    interact: true, // Allow drag seeking
-                    backend: 'MediaElement' // Better for large files/lazy loading
+                    interact: true,
                 });
 
+                // Events
                 ws.on('ready', () => {
-                    document.getElementById(`spinner-${id}`)?.remove();
-                    document.getElementById(`waveform-${id}`).classList.remove('opacity-0');
-                    // Ensure volume set
-                    ws.setVolume(this.isMuted ? 0 : this.volume);
+                    const spinner = document.getElementById(`spinner-${id}`);
+                    if(spinner) spinner.remove();
+                    container.classList.remove('opacity-0');
+                    container.classList.add('opacity-80');
                 });
 
                 ws.on('play', () => {
-                    this.activeId = id;
+                    this.loadingId = null;
                     this.updateUI(id, 'playing');
-                    this.vibrate();
-                });
-                
-                ws.on('pause', () => this.updateUI(id, 'paused'));
-                
-                ws.on('audioprocess', (t) => {
-                    this.updateTime(id, t, ws.getDuration());
+                    this.showSticky(id);
+                    this.activeId = id;
+                    this.audioElement = audio;
+                    this.audioElement.volume = this.isMuted ? 0 : this.volume;
+                    UI.announce(`Playing ${songs.find(s=>s.id===id).title}`);
                 });
 
-                ws.on('finish', () => {
-                    this.updateUI(id, 'paused');
-                    ws.seekTo(0);
+                ws.on('pause', () => { this.updateUI(id, 'paused'); });
+                ws.on('finish', () => { this.updateUI(id, 'paused'); ws.seekTo(0); });
+                ws.on('audioprocess', (t) => { this.updateTime(id, t, ws.getDuration()); });
+                
+                // Fallback / Time update for fallback
+                audio.addEventListener('timeupdate', () => {
+                    // Always update time incase WS is hidden or failed
+                     this.updateTime(id, audio.currentTime, audio.duration || 0);
+                     const fb = document.getElementById(`fallback-progress-${id}`);
+                     if(fb && audio.duration) fb.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
                 });
 
                 ws.on('interaction', () => {
-                    if (this.activeId !== id) this.play(id);
+                    if(this.activeId !== id) this.play(id);
+                    else ws.play();
                 });
-
-                ws.on('error', () => {
-                    document.getElementById(`spinner-${id}`)?.remove();
-                    document.getElementById(`waveform-${id}`).classList.add('hidden');
-                    document.getElementById(`fallback-bar-${id}`).classList.remove('hidden');
+                
+                ws.on('error', (e) => {
+                    console.warn(`WaveSurfer Error on ID ${id}:`, e);
+                    const waveDiv = document.getElementById(`waveform-${id}`);
+                    const fbDiv = document.getElementById(`fallback-bar-${id}`);
+                    const spinner = document.getElementById(`spinner-${id}`);
+                    
+                    if (waveDiv) waveDiv.classList.add('hidden');
+                    if (spinner) spinner.remove();
+                    if (fbDiv) {
+                        fbDiv.classList.remove('hidden');
+                        fbDiv.previousElementSibling.innerText = "Preview Mode"; // Update label
+                    }
                 });
-
+                
                 this.wavesurfers[id] = ws;
                 return ws;
             },
 
             play(id) {
                 if (this.activeId !== null && this.activeId !== id) {
-                    this.wavesurfers[this.activeId]?.pause();
+                    const prevWs = this.wavesurfers[this.activeId];
+                    if (prevWs) prevWs.pause();
                 }
                 
                 const ws = this.wavesurfers[id];
                 if (ws) {
-                    // Show loader on buttons
-                    this.setBtnLoading(id, true);
-                    ws.play().then(() => this.setBtnLoading(id, false)).catch(() => this.setBtnLoading(id, false));
+                    // Set loading state
+                    this.loadingId = id;
+                    this.updateBtnLoading(id, true);
+                    
+                    ws.play().catch(e => {
+                        console.error("Play failed", e);
+                        this.updateBtnLoading(id, false);
+                    });
                     this.activeId = id;
-                    UI.showSticky(id);
+                    this.showSticky(id);
                 }
             },
 
             toggle(id) {
                 const ws = this.wavesurfers[id];
                 if (!ws) return;
-                ws.isPlaying() ? ws.pause() : this.play(id);
+                
+                if (this.activeId === id && ws.isPlaying()) {
+                    ws.pause();
+                } else {
+                    this.play(id);
+                }
             },
 
             togglePlay() {
                 if (this.activeId !== null) this.toggle(this.activeId);
             },
 
-            skip(sec) {
+            skip(seconds) {
                 if (this.activeId !== null) {
-                    this.wavesurfers[this.activeId]?.skip(sec);
-                    this.vibrate();
+                    const ws = this.wavesurfers[this.activeId];
+                    if (ws) ws.skip(seconds);
                 }
             },
 
-            setVolume(val) {
-                this.volume = parseFloat(val);
-                this.isMuted = this.volume <= 0;
-                Object.values(this.wavesurfers).forEach(ws => ws.setVolume(this.volume));
+            // Sticky Progress Bar Click
+            seekFromSticky(e) {
+                if (this.activeId === null) return;
+                const ws = this.wavesurfers[this.activeId];
+                if (!ws) return;
+
+                const bounds = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - bounds.left;
+                const ratio = x / bounds.width;
+                const duration = ws.getDuration();
+                ws.seekTo(ratio);
+            },
+
+            setVolume(value) {
+                this.volume = Math.max(0, Math.min(1, parseFloat(value)));
+                if (this.volume > 0) {
+                    this.isMuted = false;
+                    this.previousVolume = this.volume;
+                }
+                this.applyVolume();
                 this.updateVolumeUI();
             },
 
+            adjustVolume(delta) { this.setVolume(this.volume + delta); },
+
             toggleMute() {
-                this.isMuted = !this.isMuted;
-                const v = this.isMuted ? 0 : (this.volume || 0.5);
-                Object.values(this.wavesurfers).forEach(ws => ws.setVolume(v));
+                if (this.isMuted) {
+                    this.isMuted = false;
+                    this.volume = this.previousVolume || 0.5;
+                } else {
+                    this.isMuted = true;
+                    this.previousVolume = this.volume > 0 ? this.volume : 0.5;
+                    this.volume = 0;
+                }
+                this.applyVolume();
                 this.updateVolumeUI();
+            },
+
+            applyVolume() {
+                const effectiveVolume = this.isMuted ? 0 : this.volume;
+                if (this.audioElement) this.audioElement.volume = effectiveVolume;
+                Object.values(this.wavesurfers).forEach(ws => ws.setVolume(effectiveVolume));
             },
 
             updateVolumeUI() {
-                const sl = document.getElementById('expanded-volume');
-                if(sl) sl.value = this.isMuted ? 0 : this.volume;
-                
-                const icon = document.getElementById('expanded-mute-icon');
-                if(icon) icon.className = this.isMuted ? 'fas fa-volume-mute text-xl' : 'fas fa-volume-up text-xl';
+                const slider = document.getElementById('volume-slider');
+                const icon = document.getElementById('volume-icon');
+                if (slider) slider.value = this.volume;
+                if (icon) {
+                    if (this.isMuted || this.volume === 0) icon.className = 'fas fa-volume-mute';
+                    else if (this.volume < 0.5) icon.className = 'fas fa-volume-down';
+                    else icon.className = 'fas fa-volume-up';
+                }
             },
 
-            seekFromExpanded(e) {
-                if (this.activeId === null) return;
-                const rect = e.currentTarget.getBoundingClientRect();
-                const ratio = (e.clientX - rect.left) / rect.width;
-                this.wavesurfers[this.activeId]?.seekTo(ratio);
-            },
-
-            seekFromSticky(e) {
-                if(this.activeId === null) return;
-                 // Similar logic if sticky progress bar was interactive
-            },
-
-            setBtnLoading(id, loading) {
-                const html = loading ? '<div class="loader"></div>' : (this.activeId === id ? '<i class="fas fa-pause ml-1"></i>' : '<i class="fas fa-play ml-1"></i>');
+            updateBtnLoading(id, isLoading) {
                 const btn = document.getElementById(`btn-${id}`);
-                const sticky = document.getElementById('sticky-play-btn');
-                const expanded = document.getElementById('expanded-play-btn');
+                const stickyBtn = document.getElementById('sticky-play-btn');
                 
-                if (btn) btn.innerHTML = loading ? '<div class="loader"></div>' : (this.activeId === id ? '<i class="fas fa-pause text-base"></i>' : '<i class="fas fa-play ml-1 text-base"></i>');
-                if (sticky && this.activeId === id) sticky.innerHTML = loading ? '<div class="loader"></div>' : '<i class="fas fa-pause"></i>';
-                if (expanded && this.activeId === id) expanded.innerHTML = loading ? '<div class="loader"></div>' : '<i class="fas fa-pause ml-1"></i>';
+                const spinnerHtml = '<div class="loader"></div>';
+                
+                if (isLoading) {
+                    if(btn) btn.innerHTML = spinnerHtml;
+                    if(stickyBtn && this.activeId === id) stickyBtn.innerHTML = spinnerHtml;
+                }
             },
 
             updateUI(id, state) {
-                const isPlaying = state === 'playing';
-                
-                // Card UI
-                const vinyl = document.getElementById(`vinyl-${id}`);
                 const btn = document.getElementById(`btn-${id}`);
+                const vinyl = document.getElementById(`vinyl-${id}`);
+                const stickyBtn = document.getElementById('sticky-play-btn');
                 
-                if (isPlaying) {
-                    // Reset others
-                    Object.keys(this.wavesurfers).forEach(oid => {
-                        if(oid != id) {
-                           const v = document.getElementById(`vinyl-${oid}`);
-                           const b = document.getElementById(`btn-${oid}`);
-                           if(v) { v.classList.remove('playing-spin'); v.classList.add('paused-spin'); }
-                           if(b) b.innerHTML = '<i class="fas fa-play ml-1 text-base"></i>';
-                        }
-                    });
-
-                    if(vinyl) { vinyl.classList.remove('paused-spin'); vinyl.classList.add('animate-spin-slow', 'playing-spin'); }
-                    if(btn) btn.innerHTML = '<i class="fas fa-pause text-base"></i>';
-                } else {
-                     if(vinyl) { vinyl.classList.remove('playing-spin'); vinyl.classList.add('paused-spin'); }
-                     if(btn) btn.innerHTML = '<i class="fas fa-play ml-1 text-base"></i>';
+                // Reset others
+                if (state === 'playing') {
+                   Object.keys(this.wavesurfers).forEach(otherId => {
+                       if(otherId != id) {
+                           const v = document.getElementById(`vinyl-${otherId}`);
+                           const b = document.getElementById(`btn-${otherId}`);
+                           if(v) {
+                               v.classList.remove('animate-spin-slow', 'paused-spin', 'playing-spin');
+                               v.style.transform = 'rotate(0deg)';
+                           }
+                           if(b) b.innerHTML = '<i class="fas fa-play ml-1 text-sm"></i>';
+                       }
+                   });
                 }
 
-                // Sticky/Expanded UI
-                const sBtn = document.getElementById('sticky-play-btn');
-                const eBtn = document.getElementById('expanded-play-btn');
-                const icon = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play ml-1"></i>';
-                
-                if (sBtn) sBtn.innerHTML = icon;
-                if (eBtn) eBtn.innerHTML = isPlaying ? '<i class="fas fa-pause ml-1"></i>' : '<i class="fas fa-play ml-2"></i>';
+                if (btn) {
+                    if (state === 'playing') {
+                        btn.innerHTML = '<i class="fas fa-pause text-sm"></i>';
+                        btn.setAttribute('aria-label', 'Pause Song');
+                        if (vinyl) {
+                            vinyl.classList.remove('paused-spin');
+                            vinyl.classList.add('animate-spin-slow', 'playing-spin');
+                        }
+                        if (stickyBtn) stickyBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    } else {
+                        btn.innerHTML = '<i class="fas fa-play ml-1 text-sm"></i>';
+                        btn.setAttribute('aria-label', 'Play Song');
+                        if (vinyl) {
+                            vinyl.classList.remove('playing-spin');
+                            vinyl.classList.add('paused-spin');
+                        }
+                        if (stickyBtn) stickyBtn.innerHTML = '<i class="fas fa-play ml-1"></i>';
+                    }
+                }
             },
 
-            updateTime(id, current, total) {
-                if (!total) return;
-                const fmt = t => {
+            updateTime(id, currentTime, duration) {
+                if (!Number.isFinite(duration) || duration === 0) return;
+                const remaining = duration - currentTime;
+                const format = (t) => {
                     const m = Math.floor(t / 60);
                     const s = Math.floor(t % 60);
-                    return `${m}:${s<10?'0':''}${s}`;
+                    return `${m}:${s < 10 ? '0' : ''}${s}`;
                 };
-
-                // Card
-                const cardTime = document.getElementById(`time-${id}`);
-                if (cardTime) cardTime.innerText = fmt(total - current); // Count down
-
-                // Sticky/Expanded
-                if (this.activeId === id) {
-                    const pct = (current / total) * 100 + '%';
-                    document.getElementById('sticky-progress-bar').style.width = pct;
-                    document.getElementById('expanded-progress').style.width = pct;
-                    document.getElementById('expanded-time-current').innerText = fmt(current);
-                    document.getElementById('expanded-time-total').innerText = fmt(total);
-                }
-            }
-        };
-
-        // --- UI Manager ---
-        const UI = {
-            isExpanded: false,
-            
-            init() {
-                this.setupScroll();
-                this.setupGestures();
-                this.renderSongs();
-            },
-
-            setupScroll() {
-                let lastY = 0;
-                const nav = document.getElementById('navbar');
-                const topBtn = document.getElementById('back-to-top');
-
-                window.addEventListener('scroll', () => {
-                    const y = window.scrollY;
-                    
-                    // Navbar Hide
-                    if (y > lastY && y > 100) nav.style.transform = 'translateY(-100%)';
-                    else nav.style.transform = 'translateY(0)';
-
-                    // Back to Top
-                    if (y > 400) {
-                        topBtn.classList.remove('translate-y-20', 'opacity-0');
-                    } else {
-                        topBtn.classList.add('translate-y-20', 'opacity-0');
-                    }
-
-                    lastY = y;
-                }, { passive: true });
-            },
-
-            setupGestures() {
-                // Swipe Sticky Player
-                const sticky = document.getElementById('sticky-player');
-                let startY = 0;
-
-                sticky.addEventListener('touchstart', e => startY = e.touches[0].clientY, {passive: true});
-                sticky.addEventListener('touchend', e => {
-                    const diff = e.changedTouches[0].clientY - startY;
-                    if (Math.abs(diff) > 50) {
-                        // Swipe Up -> Expand
-                        if (diff < 0 && !this.isExpanded) this.toggleExpandedPlayer(true);
-                        // Swipe Down -> Collapse
-                        if (diff > 0 && this.isExpanded) this.toggleExpandedPlayer(false);
-                    }
-                });
-            },
-
-            toggleExpandedPlayer(expand) {
-                this.isExpanded = expand;
-                const p = document.getElementById('sticky-player');
+                const timeStr = `${format(currentTime)} <span class="text-white/30 mx-1">/</span> -${format(remaining)}`;
                 
-                if (expand) {
-                    p.classList.add('expanded-player');
-                    document.body.classList.add('modal-open');
-                } else {
-                    p.classList.remove('expanded-player');
-                    document.body.classList.remove('modal-open');
+                const display = document.getElementById(`time-${id}`);
+                if (display) display.innerHTML = timeStr;
+
+                // Sticky Player updates
+                if (this.activeId === id) {
+                    const stickyCurrent = document.getElementById('sticky-time-current');
+                    const stickyTotal = document.getElementById('sticky-time-total');
+                    const stickyProg = document.getElementById('sticky-progress-bar');
+                    
+                    if (stickyCurrent) stickyCurrent.innerText = format(currentTime);
+                    if (stickyTotal) stickyTotal.innerText = format(duration);
+                    if (stickyProg) stickyProg.style.width = `${(currentTime/duration)*100}%`;
                 }
             },
 
             showSticky(id) {
-                const s = songs.find(x => x.id === id);
-                if (!s) return;
-
-                // Update Data
-                ['sticky', 'expanded'].forEach(pre => {
-                    document.getElementById(`${pre}-title`).innerText = s.title;
-                    document.getElementById(`${pre}-cover`).src = s.cover;
-                });
-
                 const sticky = document.getElementById('sticky-player');
-                sticky.classList.remove('hidden', 'translate-y-full');
+                const song = songs.find(s => s.id === id);
+                if (!song) return;
+
+                document.getElementById('sticky-title').innerText = song.title;
+                document.getElementById('sticky-artist').innerText = song.artist;
+                document.getElementById('sticky-cover').src = song.cover;
+                
+                sticky.classList.remove('hidden');
+                setTimeout(() => {
+                    sticky.classList.add('visible');
+                }, 10);
+            }
+        };
+
+        // --- UI Manager Module ---
+        const UI = {
+            init() {
+                this.setupNavbarScroll();
+                this.setupProfileGestures();
+                this.setupLightbox();
+                this.renderSongs();
             },
 
-            openProfile() {
-                document.getElementById('profile-view').classList.remove('translate-x-full');
-                document.body.classList.add('modal-open');
-            },
-            closeProfile() {
-                document.getElementById('profile-view').classList.add('translate-x-full');
-                document.body.classList.remove('modal-open');
+            announce(msg) {
+                const el = document.getElementById('a11y-announcer');
+                if(el) el.textContent = msg;
             },
 
-            openLightbox(btn) {
-                const img = document.getElementById('lightbox-img');
-                img.src = btn.dataset.src;
-                document.getElementById('lightbox').classList.remove('opacity-0', 'pointer-events-none');
-                document.body.classList.add('modal-open');
-            },
-            closeLightbox() {
-                document.getElementById('lightbox').classList.add('opacity-0', 'pointer-events-none');
-                document.body.classList.remove('modal-open');
+            // Navbar Logic
+            setupNavbarScroll() {
+                let lastScroll = 0;
+                const nav = document.getElementById('navbar');
+                const links = document.querySelectorAll('.nav-link');
+                
+                window.addEventListener('scroll', () => {
+                    const currentScroll = window.pageYOffset;
+                    
+                    // Hide/Show
+                    if (currentScroll > lastScroll && currentScroll > 100) {
+                        nav.style.transform = 'translateY(-100%)';
+                    } else {
+                        nav.style.transform = 'translateY(0)';
+                    }
+                    lastScroll = currentScroll;
+
+                    // Highlight Active Link
+                    let currentSection = '';
+                    const sections = ['featured', 'discography', 'about'];
+                    sections.forEach(id => {
+                        const section = document.getElementById(id);
+                        if (section) {
+                            const sectionTop = section.offsetTop;
+                            if (pageYOffset >= sectionTop - 150) {
+                                currentSection = id;
+                            }
+                        }
+                    });
+
+                    links.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href').includes(currentSection)) {
+                            link.classList.add('active');
+                        }
+                    });
+                });
             },
 
+            // Modal Logic
             openEmailModal() {
-                document.getElementById('email-modal').classList.remove('hidden', 'opacity-0');
+                const modal = document.getElementById('email-modal');
+                const content = document.getElementById('email-modal-content');
+                document.body.classList.add('modal-open');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.add('opacity-100');
+                    content.classList.add('scale-100');
+                }, 10);
+            },
+
+            closeEmailModal() {
+                const modal = document.getElementById('email-modal');
+                const content = document.getElementById('email-modal-content');
+                modal.classList.remove('opacity-100');
+                content.classList.remove('scale-100');
+                document.body.classList.remove('modal-open');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            },
+
+            // Profile Logic
+            openProfile() {
+                const view = document.getElementById('profile-view');
+                view.classList.remove('translate-x-full');
+                document.body.style.overflow = 'hidden';
+                view.focus();
+                
+                // Add ESC listener
+                const escListener = (e) => {
+                    if (e.key === 'Escape') {
+                        this.closeProfile();
+                        document.removeEventListener('keydown', escListener);
+                    }
+                };
+                document.addEventListener('keydown', escListener);
+            },
+
+            closeProfile() {
+                const view = document.getElementById('profile-view');
+                view.classList.add('translate-x-full');
+                document.body.style.overflow = '';
+            },
+
+            setupProfileGestures() {
+                const view = document.getElementById('profile-view');
+                let startX = 0;
+                let currentX = 0;
+
+                view.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                }, {passive: true});
+
+                view.addEventListener('touchmove', (e) => {
+                    currentX = e.touches[0].clientX;
+                    const diff = currentX - startX;
+                    if (diff > 0) { // Sliding right
+                        // Optional: Visualize drag (skipped for simplicity/perf)
+                    }
+                }, {passive: true});
+
+                view.addEventListener('touchend', () => {
+                    if (currentX > startX && (currentX - startX) > 100) {
+                        this.closeProfile();
+                    }
+                    startX = 0;
+                    currentX = 0;
+                });
+            },
+
+            // Lightbox
+            openLightbox(btn) {
+                const src = btn.getAttribute('data-src');
+                const lb = document.getElementById('lightbox');
+                const img = document.getElementById('lightbox-img');
+                img.src = src;
+                lb.classList.add('open');
                 document.body.classList.add('modal-open');
             },
-            closeEmailModal() {
-                document.getElementById('email-modal').classList.add('opacity-0');
-                setTimeout(() => document.getElementById('email-modal').classList.add('hidden'), 300);
+
+            closeLightbox() {
+                const lb = document.getElementById('lightbox');
+                lb.classList.remove('open');
                 document.body.classList.remove('modal-open');
             },
-
-            toggleDesc(btn) {
-                const p = btn.previousElementSibling;
-                p.classList.toggle('line-clamp-2');
-                btn.innerText = p.classList.contains('line-clamp-2') ? 'Read More' : 'Show Less';
+            
+            setupLightbox() {
+                document.getElementById('lightbox').addEventListener('click', (e) => {
+                    if (e.target.id === 'lightbox') this.closeLightbox();
+                });
             },
 
+            toggleDescription(btn) {
+                const container = btn.previousElementSibling;
+                container.classList.toggle('line-clamp-2');
+                btn.innerText = container.classList.contains('line-clamp-2') ? 'Read More' : 'Show Less';
+            },
+
+            // Rendering
             renderSongs() {
                 const container = document.getElementById('song-container');
-                container.innerHTML = songs.map(song => `
-                    <div class="glass-panel rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-6 md:gap-10 items-center md:items-start group transition-all duration-300 card-fade-item relative" data-id="${song.id}">
-                        
-                        <!-- Mobile Layout: Centered Vertical Stack -->
-                        
-                        <!-- Cover -->
-                        <div class="relative shrink-0 w-48 h-48 md:w-40 md:h-40">
-                            <div class="w-full h-full rounded-full overflow-hidden shadow-2xl relative z-10 vinyl-container transition-transform duration-700 ease-out" id="vinyl-${song.id}">
+                
+                // Color map for subtle backgrounds based on index
+                const colors = ['bg-blue-500/5', 'bg-purple-500/5', 'bg-red-500/5', 'bg-emerald-500/5'];
+
+                container.innerHTML = songs.map((song, index) => {
+                    const bgClass = colors[index % colors.length];
+                    return `
+                    <div class="glass-panel rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center md:items-start group transition-colors duration-500 card-fade-item relative overflow-hidden" data-id="${song.id}">
+                        <!-- Subtle BG Blob -->
+                        <div class="absolute -right-20 -top-20 w-64 h-64 ${bgClass} rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+
+                        <div class="relative shrink-0">
+                            <div class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-2xl relative z-10 vinyl-container transition-transform duration-700 ease-out" id="vinyl-${song.id}">
                                 <div class="absolute inset-0 bg-black"></div>
-                                <img src="${song.cover}" class="w-full h-full object-cover opacity-90" loading="lazy">
+                                <img src="${song.cover}" alt="Cover Art for ${song.title}" class="w-full h-full object-cover opacity-80" loading="lazy">
                                 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-otter-card rounded-full border-2 border-otter-accent/50 z-20"></div>
+                                <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent rounded-full"></div>
                             </div>
                         </div>
 
-                        <div class="flex-grow w-full text-center md:text-left z-10 flex flex-col justify-center">
-                            
-                            <div class="mb-4">
-                                <h3 class="font-display text-3xl md:text-4xl font-bold text-white mb-1 leading-tight">${song.title}</h3>
+                        <div class="flex-grow text-center md:text-left w-full z-10 relative">
+                            <div class="flex flex-col mb-2">
+                                <h3 class="font-display text-3xl md:text-4xl font-bold text-white mb-1 tracking-tight">${song.title}</h3>
                                 <p class="text-otter-accent font-medium text-lg">${song.artist}</p>
                             </div>
 
-                            <div class="mb-6 mx-auto md:mx-0 max-w-lg">
-                                <p class="text-gray-400 text-sm leading-relaxed line-clamp-2 transition-all duration-300">${song.description}</p>
-                                <button onclick="UI.toggleDesc(this)" class="tap-target-sm text-xs text-white/50 hover:text-white font-bold uppercase tracking-wider mt-1">Read More</button>
+                            <div class="relative mb-6 max-w-2xl">
+                                <p class="text-gray-500 text-sm leading-relaxed line-clamp-2 transition-all duration-300">${song.description}</p>
+                                <button onclick="UI.toggleDescription(this)" class="text-xs text-white/40 hover:text-white mt-1 font-medium transition-colors focus:outline-none">Read More</button>
                             </div>
 
-                            <!-- Controls -->
-                            <div class="flex flex-col md:flex-row items-center gap-6 md:gap-8 w-full">
-                                
-                                <!-- Play Button & Waveform -->
-                                <div class="flex items-center gap-4 bg-white/5 rounded-2xl p-2 pr-4 border border-white/10 w-full max-w-md mx-auto md:mx-0 shadow-inner">
-                                    <button onclick="AudioController.toggle(${song.id})" id="btn-${song.id}" class="shrink-0 w-14 h-14 rounded-full bg-otter-accent text-otter-dark flex items-center justify-center hover:scale-105 transition-all shadow-lg tap-target" aria-label="Play">
-                                        <i class="fas fa-play ml-1 text-base"></i>
+                            <div class="flex flex-col md:flex-row items-center gap-6">
+                                <!-- Player Control -->
+                                <div class="flex items-center gap-4 bg-white/[0.03] backdrop-blur-sm rounded-xl p-3 pr-6 border border-white/10 w-full md:w-auto shadow-inner hover:border-otter-accent/30 transition-colors duration-300">
+                                    <button onclick="AudioController.toggle(${song.id})" id="btn-${song.id}" class="shrink-0 w-14 h-14 rounded-full bg-otter-accent text-otter-dark flex items-center justify-center hover:scale-105 hover:bg-white hover:text-otter-dark transition-all shadow-[0_0_10px_rgba(203,161,114,0.3)] tap-target" aria-label="Play ${song.title}">
+                                        <i class="fas fa-play ml-1 text-base" aria-hidden="true"></i>
                                     </button>
                                     
-                                    <div class="flex-grow h-12 relative flex flex-col justify-center">
+                                    <div class="flex-grow md:w-72 w-full flex flex-col justify-center h-12 relative">
                                         <!-- Loader -->
                                         <div id="spinner-${song.id}" class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                            <div class="w-8 h-8 border-2 border-white/10 border-t-otter-accent rounded-full animate-spin"></div>
+                                            <div class="w-full h-2 bg-white/5 rounded-full overflow-hidden animate-pulse"></div>
                                         </div>
 
                                         <!-- Waveform -->
-                                        <div id="waveform-${song.id}" class="w-full h-10 opacity-0 transition-opacity"></div>
+                                        <div id="waveform-${song.id}" class="w-full h-8 opacity-0 transition-opacity duration-500 cursor-pointer"></div>
                                         
-                                        <!-- Fallback -->
-                                        <div class="hidden w-full text-center" id="fallback-bar-${song.id}">
-                                             <span class="text-[10px] text-gray-500 uppercase font-bold">Preview Mode</span>
+                                        <!-- Fallback Bar -->
+                                        <div class="hidden flex flex-col justify-center w-full" id="fallback-bar-${song.id}">
+                                             <span class="text-[9px] text-gray-600 uppercase tracking-widest mb-1">Preview Mode</span>
+                                             <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                                 <div id="fallback-progress-${song.id}" class="h-full bg-otter-accent w-0 transition-all duration-100"></div>
+                                             </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-end text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-2 w-full">
+                                            <span class="opacity-50">${song.releaseDate}</span>
+                                            <span id="time-${song.id}" class="tabular-nums text-gray-400">${song.duration}</span>
                                         </div>
                                     </div>
-
-                                    <div class="text-[10px] font-mono text-gray-500 w-8 text-right" id="time-${song.id}">${song.duration}</div>
                                 </div>
 
-                                <!-- Links -->
-                                <div class="flex items-center gap-4 text-2xl text-white/40">
-                                    ${song.spotifyUrl ? `<a href="${song.spotifyUrl}" target="_blank" class="tap-target hover:text-[#1DB954]"><i class="fab fa-spotify"></i></a>` : `<span class="opacity-20"><i class="fab fa-spotify"></i></span>`}
-                                    ${song.youtubeUrl ? `<a href="${song.youtubeUrl}" target="_blank" class="tap-target hover:text-[#FF0000]"><i class="fab fa-youtube"></i></a>` : `<span class="opacity-20"><i class="fab fa-youtube"></i></span>`}
+                                <div class="h-8 w-px bg-white/10 hidden md:block"></div>
+
+                                <div class="flex items-center gap-4">
+                                    ${song.spotifyUrl ? `
+                                    <a href="${song.spotifyUrl}" target="_blank" class="platform-link text-white/60 hover:text-[#1DB954] text-2xl p-2 tap-target" title="Listen on Spotify">
+                                        <i class="fab fa-spotify" aria-hidden="true"></i>
+                                    </a>` : `
+                                    <span class="text-white/10 cursor-not-allowed text-2xl p-2" title="Releasing Soon">
+                                        <i class="fab fa-spotify" aria-hidden="true"></i>
+                                    </span>`}
+                                    
+                                    ${song.youtubeUrl ? `
+                                    <a href="${song.youtubeUrl}" target="_blank" class="platform-link text-white/60 hover:text-[#FF0000] text-2xl p-2 tap-target" title="Watch on YouTube">
+                                        <i class="fab fa-youtube" aria-hidden="true"></i>
+                                    </a>` : `
+                                    <span class="text-white/10 cursor-not-allowed text-2xl p-2" title="Releasing Soon">
+                                        <i class="fab fa-youtube" aria-hidden="true"></i>
+                                    </span>`}
                                 </div>
                             </div>
                         </div>
                     </div>
-                `).join('');
-
+                `}).join('');
+                
                 this.setupObservers();
             },
 
             setupObservers() {
-                const obs = new IntersectionObserver((entries, o) => {
-                    entries.forEach(e => {
-                        if (e.isIntersecting) {
-                            e.target.classList.add('animate-fade-in-up');
-                            // Lazy load audio only when card visible
-                            if (e.target.dataset.id) {
-                                const id = parseInt(e.target.dataset.id);
-                                AudioController.createWaveSurfer(id, songs.find(s=>s.id===id).previewUrl);
-                            }
-                            o.unobserve(e.target);
+                // Fade In Animation
+                const fadeObserver = new IntersectionObserver((entries, obs) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('animate-fade-in-up');
+                            obs.unobserve(entry.target);
                         }
                     });
-                }, { threshold: 0.1, rootMargin: '50px' });
+                }, { threshold: 0.1 });
+                
+                document.querySelectorAll('.card-fade-item').forEach(el => fadeObserver.observe(el));
+                document.querySelectorAll('#featured > *').forEach(el => fadeObserver.observe(el));
 
-                document.querySelectorAll('.card-fade-item').forEach(el => obs.observe(el));
-                document.querySelectorAll('#featured > *').forEach(el => obs.observe(el));
+                // Lazy Audio Initialization
+                const audioObserver = new IntersectionObserver((entries, obs) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const id = parseInt(entry.target.getAttribute('data-id'));
+                            const song = songs.find(s => s.id === id);
+                            if (song) {
+                                AudioController.createWaveSurfer(id, song.previewUrl);
+                                obs.unobserve(entry.target);
+                            }
+                        }
+                    });
+                }, { rootMargin: '100px' }); // Init when 100px away
+
+                document.querySelectorAll('.card-fade-item').forEach(el => audioObserver.observe(el));
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => UI.init());
+        // --- Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            AudioController.init();
+            UI.init();
+        });
+
     </script>
 </body>
 </html>
