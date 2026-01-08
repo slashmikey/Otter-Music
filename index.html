@@ -2,7 +2,8 @@
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Accessibility & Viewport: Removed user-scalable=no, added viewport-fit=cover for notches -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Otter Music | Soundscapes</title>
     
     <!-- Preload Critical Assets -->
@@ -115,7 +116,8 @@
             background: rgba(20, 19, 24, 0.98);
             border-top: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
-            padding-bottom: env(safe-area-inset-bottom, 16px);
+            /* Handle Safe Areas for iPhone X+ */
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
         }
 
         /* Interaction */
@@ -205,7 +207,7 @@
         }
     </style>
 </head>
-<body class="bg-otter-dark text-gray-200 font-sans antialiased pb-24 md:pb-24 selection:bg-otter-accent selection:text-black">
+<body class="bg-otter-dark text-gray-200 font-sans antialiased pb-32 md:pb-24 selection:bg-otter-accent selection:text-black">
 
     <div id="a11y-announcer" class="sr-only" aria-live="polite"></div>
 
@@ -316,7 +318,7 @@
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
         </div>
         <div class="relative z-10 text-center max-w-4xl mx-auto" id="featured">
-            <h1 class="font-display text-5xl md:text-8xl font-bold text-white mb-8 leading-tight opacity-0 animate-fade-in-up" style="animation-delay: 0.4s;">
+            <h1 class="font-display text-4xl sm:text-5xl md:text-8xl font-bold text-white mb-8 leading-tight opacity-0 animate-fade-in-up" style="animation-delay: 0.4s;">
                 Music for every <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-otter-accent to-white">moment</span>
             </h1>
             <p class="text-base md:text-lg text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed opacity-0 animate-fade-in-up" style="animation-delay: 0.6s;">
@@ -494,10 +496,9 @@
                 this.isMobile = window.innerWidth < 768;
                 this.setupKeyboardShortcuts();
                 this.updateVolumeUI();
-
-                // Start loading immediately
-                this.initWaveSurfer(0, songs[0].previewUrl);
-                this.startLazyLoad();
+                
+                // LOAD ALL IMMEDIATELY: Initialize all waveforms at startup
+                songs.forEach(song => this.initWaveSurfer(song.id, song.previewUrl));
             },
 
             initWaveSurfer(id, url) {
@@ -506,11 +507,10 @@
                 const container = document.getElementById(`waveform-${id}`);
                 if (!container) return;
 
-                // Smart Backend Selection:
-                // Use MediaElement (HTML5 Audio) for everyone to ensure fast loading and mobile compatibility.
-                // It works on Desktop too, just slightly less precise viz, but reliability > visuals here.
-                const backend = 'MediaElement'; 
-                
+                // Ensure container is clear and ready
+                container.innerHTML = '';
+                container.className = "w-full h-8 md:h-12 opacity-0 transition-opacity duration-500";
+
                 const ws = WaveSurfer.create({
                     container: container,
                     waveColor: '#4b5563',
@@ -519,12 +519,13 @@
                     barWidth: 2,
                     barRadius: 3,
                     barGap: 3,
-                    height: this.isMobile ? 32 : 48, // Smaller on mobile
+                    height: this.isMobile ? 32 : 48, 
                     normalize: true,
-                    backend: backend,
-                    pixelRatio: this.isMobile ? 1 : window.devicePixelRatio, // Save battery on mobile
+                    backend: 'MediaElement', // Keep MediaElement for better compatibility
+                    pixelRatio: 1, 
                     mediaControls: false,
                     dragToSeek: true,
+                    fetchParams: { cache: 'force-cache' }
                 });
 
                 ws.load(url);
@@ -540,7 +541,6 @@
                     this.updateUI(id, true);
                     this.activeId = id;
                     this.showSticky(id);
-                    // Announce for a11y
                 });
 
                 ws.on('pause', () => this.updateUI(id, false));
@@ -555,7 +555,7 @@
 
                 ws.on('interaction', () => {
                     if (this.activeId !== null && this.activeId !== id) {
-                        this.wavesurfers[this.activeId].pause();
+                        if(this.wavesurfers[this.activeId]) this.wavesurfers[this.activeId].pause();
                     }
                     this.activeId = id;
                     this.showSticky(id);
@@ -564,16 +564,8 @@
                 this.wavesurfers[id] = ws;
             },
 
-            startLazyLoad() {
-                // Load remaining songs sequentially with delay
-                songs.slice(1).forEach((song, index) => {
-                    setTimeout(() => {
-                        this.initWaveSurfer(song.id, song.previewUrl);
-                    }, 500 + (index * 800));
-                });
-            },
-
             toggle(id) {
+                // Standard toggle since we load everything upfront
                 if (this.activeId !== null && this.activeId !== id) {
                     if(this.wavesurfers[this.activeId]) this.wavesurfers[this.activeId].pause();
                 }
