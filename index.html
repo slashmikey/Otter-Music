@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 
     <!-- WaveSurfer.js -->
     <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
@@ -33,6 +33,7 @@
                     fontFamily: {
                         sans: ['Space Grotesk', 'sans-serif'],
                         display: ['Syne', 'sans-serif'],
+                        montserrat: ['Montserrat', 'sans-serif'],
                     },
                     colors: {
                         'otter-dark': '#0f0e13',
@@ -368,7 +369,7 @@
                     </button>
                 </div>
                 <!-- Desktop Progress (Hidden on mobile) -->
-                <div class="hidden md:flex w-full items-center gap-2 text-[10px] text-gray-400 font-mono cursor-pointer group/progress" onclick="AudioController.seekFromSticky(event)">
+                <div class="hidden md:flex w-full items-center gap-2 text-[10px] text-gray-400 font-montserrat tabular-nums cursor-pointer group/progress" onclick="AudioController.seekFromSticky(event)">
                     <span id="sticky-time-current">0:00</span>
                     <div class="relative flex-grow h-1.5 bg-white/10 rounded-full overflow-hidden hover:h-2 transition-all">
                         <div id="sticky-progress-bar-desktop" class="absolute top-0 left-0 h-full bg-otter-accent w-0"></div>
@@ -378,7 +379,7 @@
             </div>
 
             <!-- Right: Volume/Misc -->
-            <div class="w-1/3 md:w-1/4 flex justify-end items-center gap-2 text-[10px] text-gray-400 font-mono">
+            <div class="w-1/3 md:w-1/4 flex justify-end items-center gap-2 text-[10px] text-gray-400 font-montserrat tabular-nums">
                 <!-- Mobile Time Display -->
                 <div class="md:hidden" id="sticky-time-display-mobile">0:00</div>
                 
@@ -443,7 +444,7 @@
                 releaseDate: "Soon",
                 description: "A Hindi, soft, natural edm-infused hip hop with electro synths and mellow beats.",
                 spotifyUrl: "",
-                youtubeUrl: "",
+                youtubeUrl: "https://youtu.be/WCX03DisJmc",
                 previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/FireFlies%20(%2030s%20Preview).mp3",
                 duration: "0:29"
             },
@@ -455,7 +456,7 @@
                 releaseDate: "Soon",
                 description: "Hindi hip-hop/EDM banger at 100 bpm with heavy 808s, electro, big-room hook.",
                 spotifyUrl: "",
-                youtubeUrl: "",
+                youtubeUrl: "https://youtu.be/FGgdNonCfM8",
                 previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Keher%20(30s%20Preview).mp3",
                 duration: "0:28"
             },
@@ -467,7 +468,7 @@
                 releaseDate: "Soon",
                 description: "A moody Hindi sad-love pop song blending gentle EDM pads, soft hip hop drums.",
                 spotifyUrl: "",
-                youtubeUrl: "",
+                youtubeUrl: "https://youtu.be/cBmeVKb3Hzo",
                 previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Titli%20(%2030s%20Preview).mp3",
                 duration: "0:47"
             },
@@ -479,7 +480,7 @@
                 releaseDate: "Soon",
                 description: "A soft love song with male lead vocals, romantic , slow guitar, bass, metaphor, sad, heart wrenching and heart touching.",
                 spotifyUrl: "",
-                youtubeUrl: "",
+                youtubeUrl: "https://youtu.be/AhDdYhLde1w",
                 previewUrl: "https://image2url.com/r2/bucket2/audio/1767874950025-beea945f-6891-42a7-aeb1-99ebae40ddef.mp3",
                 duration: "0:30"
             }
@@ -504,38 +505,23 @@
             initWaveSurfer(id, url) {
                 if (this.wavesurfers[id]) return;
 
-                const container = document.getElementById(`waveform-${id}`);
+                // Use hidden container for audio logic
+                const container = document.getElementById(`ws-container-${id}`);
                 if (!container) return;
-
-                // Ensure container is clear and ready
-                container.innerHTML = '';
-                container.className = "w-full h-8 md:h-12 opacity-0 transition-opacity duration-500";
 
                 const ws = WaveSurfer.create({
                     container: container,
-                    waveColor: '#4b5563',
-                    progressColor: '#cba172',
-                    cursorWidth: 0,
-                    barWidth: 2,
-                    barRadius: 3,
-                    barGap: 3,
-                    height: this.isMobile ? 32 : 48, 
-                    normalize: true,
+                    height: 1, // Minimize rendering
+                    waveColor: 'transparent',
+                    progressColor: 'transparent',
                     backend: 'MediaElement', // Keep MediaElement for better compatibility
                     pixelRatio: 1, 
                     mediaControls: false,
-                    dragToSeek: true,
+                    dragToSeek: false,
                     fetchParams: { cache: 'force-cache' }
                 });
 
                 ws.load(url);
-
-                ws.on('ready', () => {
-                    const spinner = document.getElementById(`spinner-${id}`);
-                    if(spinner) spinner.style.display = 'none';
-                    container.classList.remove('opacity-0');
-                    if(!this.isMobile) ws.setVolume(this.volume);
-                });
 
                 ws.on('play', () => {
                     this.updateUI(id, true);
@@ -550,15 +536,27 @@
                 });
 
                 ws.on('audioprocess', (time) => {
-                    if(this.activeId === id) this.updateStickyProgress(time, ws.getDuration());
+                    // Update Custom Progress Bar & Time
+                    if(this.activeId === id) {
+                        const duration = ws.getDuration();
+                        this.updateStickyProgress(time, duration);
+                        
+                        // Update In-Card Progress Bar
+                        if (duration > 0) {
+                            const pct = (time / duration) * 100;
+                            const prog = document.getElementById(`progress-${id}`);
+                            const thumb = document.getElementById(`thumb-${id}`);
+                            if(prog) prog.style.width = `${pct}%`;
+                            if(thumb) thumb.style.left = `${pct}%`;
+                            
+                            const tCur = document.getElementById(`time-cur-${id}`);
+                            if(tCur) tCur.innerText = this.formatTime(time);
+                        }
+                    }
                 });
 
                 ws.on('interaction', () => {
-                    if (this.activeId !== null && this.activeId !== id) {
-                        if(this.wavesurfers[this.activeId]) this.wavesurfers[this.activeId].pause();
-                    }
-                    this.activeId = id;
-                    this.showSticky(id);
+                     // Not triggered by custom bar interaction, handle manually in seek()
                 });
 
                 this.wavesurfers[id] = ws;
@@ -576,6 +574,26 @@
             togglePlay() {
                 if (this.activeId !== null && this.wavesurfers[this.activeId]) {
                     this.wavesurfers[this.activeId].playPause();
+                }
+            },
+
+            seek(e, id) {
+                e.stopPropagation();
+                if (this.wavesurfers[id]) {
+                    // Pause others if seeking a new track? No, just seek.
+                    // If seeking a different track, maybe play it?
+                    if(this.activeId !== null && this.activeId !== id) {
+                         if(this.wavesurfers[this.activeId]) this.wavesurfers[this.activeId].pause();
+                         this.activeId = id;
+                         this.showSticky(id);
+                    }
+                    
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const pct = Math.max(0, Math.min(1, x / rect.width));
+                    
+                    this.wavesurfers[id].seekTo(pct);
+                    this.wavesurfers[id].play();
                 }
             },
 
@@ -639,6 +657,12 @@
                 }
             },
 
+            formatTime(t) {
+                const m = Math.floor(t/60);
+                const s = Math.floor(t%60);
+                return `${m}:${s<10?'0':''}${s}`;
+            },
+
             updateStickyProgress(time, duration) {
                 if(!duration) return;
                 const pct = (time/duration)*100;
@@ -652,15 +676,9 @@
                 if(dBar) dBar.style.width = `${pct}%`;
                 if(mBar) mBar.style.width = `${pct}%`;
 
-                const fmt = (t) => {
-                    const m = Math.floor(t/60);
-                    const s = Math.floor(t%60);
-                    return `${m}:${s<10?'0':''}${s}`;
-                }
-
-                if(mTime) mTime.innerText = fmt(time);
-                if(dTimeC) dTimeC.innerText = fmt(time);
-                if(dTimeT) dTimeT.innerText = fmt(duration);
+                if(mTime) mTime.innerText = this.formatTime(time);
+                if(dTimeC) dTimeC.innerText = this.formatTime(time);
+                if(dTimeT) dTimeT.innerText = this.formatTime(duration);
             },
 
             updateVolumeUI() {
@@ -721,7 +739,7 @@
                         </div>
 
                         <!-- Content -->
-                        <div class="flex-grow min-w-0 z-10">
+                        <div class="flex-grow min-w-0 z-10 flex flex-col justify-center">
                             <div class="flex justify-between items-start mb-2 md:mb-4">
                                 <div>
                                     <h3 class="font-display font-bold text-lg md:text-3xl text-white truncate pr-2 md:mb-1">${s.title}</h3>
@@ -745,15 +763,29 @@
                                 ${s.youtubeUrl ? `<a href="${s.youtubeUrl}" target="_blank" class="hover:text-red-400"><i class="fab fa-youtube"></i> YouTube</a>` : ''}
                             </div>
 
-                            <div class="flex items-center gap-4 md:gap-6 w-full">
-                                <button id="btn-${s.id}" onclick="AudioController.toggle(${s.id})" class="play-btn w-10 h-10 md:w-14 md:h-14 rounded-full bg-otter-accent text-black flex items-center justify-center shrink-0 hover:scale-105 hover:bg-white transition-all shadow-lg tap-target">
+                            <div class="flex items-center gap-4 mt-2">
+                                <button id="btn-${s.id}" onclick="AudioController.toggle(${s.id})" class="play-btn w-10 h-10 md:w-12 md:h-12 rounded-full bg-otter-accent text-black flex items-center justify-center shrink-0 hover:scale-105 hover:bg-white transition-all shadow-lg tap-target">
                                     <i class="fas fa-play ml-0.5"></i>
                                 </button>
                                 
-                                <div class="flex-grow relative h-10 md:h-12 flex flex-col justify-center">
-                                    <div id="spinner-${s.id}" class="loader absolute left-0 md:left-1/2 md:-translate-x-1/2"></div>
-                                    <div id="waveform-${s.id}" class="w-full h-8 md:h-12 opacity-0 transition-opacity duration-500"></div>
+                                <div class="flex-grow flex flex-col justify-center gap-1 group/bar">
+                                    <!-- Spotify-style Progress Bar -->
+                                    <div class="relative w-full h-1 bg-white/10 rounded-full cursor-pointer py-2 bg-clip-content" onclick="AudioController.seek(event, ${s.id})">
+                                        <!-- Track -->
+                                        <div class="absolute top-1/2 -translate-y-1/2 left-0 w-full h-1 bg-white/10 rounded-full"></div>
+                                        <!-- Fill -->
+                                        <div id="progress-${s.id}" class="absolute top-1/2 -translate-y-1/2 left-0 h-1 bg-otter-accent rounded-full w-0 pointer-events-none transition-all duration-75 ease-linear"></div>
+                                        <!-- Thumb (Hover) -->
+                                        <div id="thumb-${s.id}" class="absolute top-1/2 -translate-y-1/2 -ml-1.5 left-0 w-3 h-3 bg-white rounded-full opacity-0 group-hover/bar:opacity-100 transition-opacity shadow pointer-events-none"></div>
+                                    </div>
+                                    <!-- Time -->
+                                     <div class="flex justify-between text-[10px] text-gray-400 font-montserrat tabular-nums">
+                                        <span id="time-cur-${s.id}">0:00</span>
+                                        <span id="time-dur-${s.id}">${s.duration}</span>
+                                    </div>
                                 </div>
+                                <!-- Hidden Audio Engine Container -->
+                                <div id="ws-container-${s.id}" class="hidden"></div>
                             </div>
                         </div>
                     </div>
