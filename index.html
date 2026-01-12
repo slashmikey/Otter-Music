@@ -23,8 +23,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <!-- WaveSurfer.js -->
-    <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
+    <!-- REMOVED WaveSurfer.js - Using Native Audio for better Drive compatibility -->
 
     <script>
         tailwind.config = {
@@ -445,7 +444,7 @@
                 description: "A Hindi, soft, natural edm-infused hip hop with electro synths and mellow beats.",
                 spotifyUrl: "",
                 youtubeUrl: "https://youtu.be/WCX03DisJmc",
-                previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/FireFlies%20(%2030s%20Preview).mp3",
+                previewUrl: "https://image2url.com/r2/default/audio/1768207786835-40916349-d7c3-40bd-9e11-42940d542f8a.mp3",
                 duration: "0:29"
             },
             {
@@ -457,7 +456,7 @@
                 description: "Hindi hip-hop/EDM banger at 100 bpm with heavy 808s, electro, big-room hook.",
                 spotifyUrl: "",
                 youtubeUrl: "https://youtu.be/FGgdNonCfM8",
-                previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Keher%20(30s%20Preview).mp3",
+                previewUrl: "https://image2url.com/r2/default/audio/1768207846145-873484b4-0150-4cd4-bbdd-6dd2fcab5a7a.mp3",
                 duration: "0:28"
             },
             {
@@ -469,7 +468,7 @@
                 description: "A moody Hindi sad-love pop song blending gentle EDM pads, soft hip hop drums.",
                 spotifyUrl: "",
                 youtubeUrl: "https://youtu.be/cBmeVKb3Hzo",
-                previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Titli%20(%2030s%20Preview).mp3",
+                previewUrl: "https://image2url.com/r2/default/audio/1768207877115-8538c04a-c286-4900-8fa7-98fc39e0dcf5.mp3",
                 duration: "0:47"
             },
             {
@@ -481,141 +480,145 @@
                 description: "A soft love song with male lead vocals, romantic , slow guitar, bass, metaphor, sad, heart wrenching and heart touching.",
                 spotifyUrl: "",
                 youtubeUrl: "https://youtu.be/AhDdYhLde1w",
-                previewUrl: "https://image2url.com/r2/bucket2/audio/1767874950025-beea945f-6891-42a7-aeb1-99ebae40ddef.mp3",
+                previewUrl: "https://image2url.com/r2/default/audio/1768207896259-efaed209-7e51-40ed-9d59-6c964abce5da.mp3",
                 duration: "0:30"
             }
         ];
 
-        // --- Hybrid Audio Module ---
+        // --- Native Audio Module (Replaced WaveSurfer) ---
         const AudioController = {
-            wavesurfers: {},
+            audio: new Audio(),
             activeId: null,
             volume: 0.5,
-            isMobile: false,
 
             init() {
-                this.isMobile = window.innerWidth < 768;
+                // REMOVED crossOrigin="anonymous" to allow standard opaque response playback from Google Drive
+                this.audio.preload = "auto";
+                this.setupAudioListeners();
                 this.setupKeyboardShortcuts();
                 this.updateVolumeUI();
-                
-                // LOAD ALL IMMEDIATELY: Initialize all waveforms at startup
-                songs.forEach(song => this.initWaveSurfer(song.id, song.previewUrl));
+                this.audio.volume = this.volume;
             },
 
-            initWaveSurfer(id, url) {
-                if (this.wavesurfers[id]) return;
-
-                // Use hidden container for audio logic
-                const container = document.getElementById(`ws-container-${id}`);
-                if (!container) return;
-
-                const ws = WaveSurfer.create({
-                    container: container,
-                    height: 1, // Minimize rendering
-                    waveColor: 'transparent',
-                    progressColor: 'transparent',
-                    backend: 'MediaElement', // Keep MediaElement for better compatibility
-                    pixelRatio: 1, 
-                    mediaControls: false,
-                    dragToSeek: false,
-                    fetchParams: { cache: 'force-cache' }
-                });
-
-                ws.load(url);
-
-                ws.on('play', () => {
-                    this.updateUI(id, true);
-                    this.activeId = id;
-                    this.showSticky(id);
-                });
-
-                ws.on('pause', () => this.updateUI(id, false));
-                ws.on('finish', () => {
-                    this.updateUI(id, false);
-                    ws.seekTo(0);
-                });
-
-                ws.on('audioprocess', (time) => {
-                    // Update Custom Progress Bar & Time
-                    if(this.activeId === id) {
-                        const duration = ws.getDuration();
-                        this.updateStickyProgress(time, duration);
-                        
-                        // Update In-Card Progress Bar
-                        if (duration > 0) {
-                            const pct = (time / duration) * 100;
-                            const prog = document.getElementById(`progress-${id}`);
-                            const thumb = document.getElementById(`thumb-${id}`);
-                            if(prog) prog.style.width = `${pct}%`;
-                            if(thumb) thumb.style.left = `${pct}%`;
-                            
-                            const tCur = document.getElementById(`time-cur-${id}`);
-                            if(tCur) tCur.innerText = this.formatTime(time);
-                        }
+            setupAudioListeners() {
+                this.audio.addEventListener('timeupdate', () => {
+                    if (this.activeId !== null) {
+                        this.updateProgress(this.audio.currentTime, this.audio.duration);
                     }
                 });
 
-                ws.on('interaction', () => {
-                     // Not triggered by custom bar interaction, handle manually in seek()
+                this.audio.addEventListener('ended', () => {
+                    this.updateUI(this.activeId, false);
+                    this.audio.currentTime = 0;
+                    this.updateProgress(0, 0); // Reset progress visually
+                });
+                
+                this.audio.addEventListener('play', () => {
+                     this.updateUI(this.activeId, true);
+                     this.showSticky(this.activeId);
                 });
 
-                this.wavesurfers[id] = ws;
+                this.audio.addEventListener('pause', () => {
+                     this.updateUI(this.activeId, false);
+                });
+
+                // Detailed Error Logging
+                this.audio.addEventListener('error', (e) => {
+                    const err = e.target.error;
+                    let msg = "Unknown Error";
+                    if (err) {
+                        switch (err.code) {
+                            case err.MEDIA_ERR_ABORTED: msg = "Aborted"; break;
+                            case err.MEDIA_ERR_NETWORK: msg = "Network Error"; break;
+                            case err.MEDIA_ERR_DECODE: msg = "Decode Error"; break;
+                            case err.MEDIA_ERR_SRC_NOT_SUPPORTED: msg = "Source Not Supported (Likely 403 or Invalid Format)"; break;
+                        }
+                    }
+                    console.error("Audio Error:", msg, e);
+                });
             },
 
-            toggle(id) {
-                // Standard toggle since we load everything upfront
-                if (this.activeId !== null && this.activeId !== id) {
-                    if(this.wavesurfers[this.activeId]) this.wavesurfers[this.activeId].pause();
+            async toggle(id) {
+                const song = songs.find(s => s.id === id);
+                if (!song) return;
+
+                if (this.activeId === id) {
+                    if (this.audio.paused) {
+                        try {
+                           await this.audio.play();
+                        } catch(e) { console.error("Play error:", e); }
+                    } else {
+                        this.audio.pause();
+                    }
+                } else {
+                    this.activeId = id;
+                    // Reset UI of previous
+                    document.querySelectorAll('.play-btn').forEach(b => b.innerHTML = '<i class="fas fa-play ml-0.5"></i>');
+                    
+                    this.audio.src = song.previewUrl;
+                    this.audio.load(); // Ensure new source is loaded
+                    
+                    try {
+                        await this.audio.play();
+                    } catch (e) {
+                         console.error("Playback failed (likely standard play() interruption or source error):", e);
+                         this.updateUI(id, false);
+                    }
+                    this.showSticky(id);
                 }
-                const ws = this.wavesurfers[id];
-                if (ws) ws.playPause();
             },
 
             togglePlay() {
-                if (this.activeId !== null && this.wavesurfers[this.activeId]) {
-                    this.wavesurfers[this.activeId].playPause();
+                if (this.activeId !== null) {
+                    if (this.audio.paused) {
+                        this.audio.play().catch(e => console.error("Resume error:", e));
+                    } else {
+                        this.audio.pause();
+                    }
                 }
             },
 
             seek(e, id) {
                 e.stopPropagation();
-                if (this.wavesurfers[id]) {
-                    // Pause others if seeking a new track? No, just seek.
-                    // If seeking a different track, maybe play it?
-                    if(this.activeId !== null && this.activeId !== id) {
-                         if(this.wavesurfers[this.activeId]) this.wavesurfers[this.activeId].pause();
-                         this.activeId = id;
-                         this.showSticky(id);
-                    }
-                    
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const pct = Math.max(0, Math.min(1, x / rect.width));
-                    
-                    this.wavesurfers[id].seekTo(pct);
-                    this.wavesurfers[id].play();
+                // If clicking a bar of a song that isn't playing, start it
+                if (this.activeId !== id) {
+                     this.toggle(id);
+                     // Allow a brief moment for src to set before seeking
+                     setTimeout(() => this.seekLogic(e), 100);
+                } else {
+                    this.seekLogic(e);
                 }
             },
 
-            skip(sec) {
-                if (this.activeId !== null && this.wavesurfers[this.activeId]) {
-                    this.wavesurfers[this.activeId].skip(sec);
+            seekLogic(e) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const pct = Math.max(0, Math.min(1, x / rect.width));
+                if (this.audio.duration) {
+                    this.audio.currentTime = pct * this.audio.duration;
                 }
             },
 
             seekFromSticky(e) {
-                if (this.activeId !== null && this.wavesurfers[this.activeId]) {
+                if (this.activeId !== null) {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const x = e.clientX - rect.left;
-                    const percent = x / rect.width;
-                    this.wavesurfers[this.activeId].seekTo(percent);
+                    const pct = Math.max(0, Math.min(1, x / rect.width));
+                    if (this.audio.duration) {
+                        this.audio.currentTime = pct * this.audio.duration;
+                    }
+                }
+            },
+
+            skip(sec) {
+                if (this.activeId !== null) {
+                    this.audio.currentTime += sec;
                 }
             },
 
             setVolume(val) {
                 this.volume = val;
-                // Update specific desktop volume
-                Object.values(this.wavesurfers).forEach(ws => ws.setVolume(val));
+                this.audio.volume = val;
                 this.updateVolumeUI();
             },
 
@@ -631,14 +634,16 @@
                 const stickyBtn = document.getElementById('sticky-play-btn');
                 const vinyl = document.getElementById(`vinyl-${id}`);
 
-                // Reset others
-                if(isPlaying) {
-                    document.querySelectorAll('.play-btn').forEach(b => b.innerHTML = '<i class="fas fa-play ml-0.5"></i>');
-                    document.querySelectorAll('.vinyl-spin').forEach(v => {
+                // Reset all other Play Buttons & Vinyls
+                document.querySelectorAll('.play-btn').forEach(b => {
+                     if(b.id !== `btn-${id}`) b.innerHTML = '<i class="fas fa-play ml-0.5"></i>';
+                });
+                document.querySelectorAll('.vinyl-spin').forEach(v => {
+                    if(v.id !== `vinyl-${id}`) {
                         v.classList.remove('playing-spin', 'animate-spin-slow'); 
                         v.classList.add('paused-spin');
-                    });
-                }
+                    }
+                });
 
                 if(isPlaying) {
                     if(btn) btn.innerHTML = '<i class="fas fa-pause"></i>';
@@ -658,15 +663,16 @@
             },
 
             formatTime(t) {
+                if(isNaN(t)) return "0:00";
                 const m = Math.floor(t/60);
                 const s = Math.floor(t%60);
                 return `${m}:${s<10?'0':''}${s}`;
             },
 
-            updateStickyProgress(time, duration) {
-                if(!duration) return;
-                const pct = (time/duration)*100;
+            updateProgress(time, duration) {
+                const pct = duration > 0 ? (time / duration) * 100 : 0;
                 
+                // --- Sticky Player ---
                 const dBar = document.getElementById('sticky-progress-bar-desktop');
                 const mBar = document.getElementById('sticky-progress-bar-mobile');
                 const mTime = document.getElementById('sticky-time-display-mobile');
@@ -675,10 +681,20 @@
 
                 if(dBar) dBar.style.width = `${pct}%`;
                 if(mBar) mBar.style.width = `${pct}%`;
-
                 if(mTime) mTime.innerText = this.formatTime(time);
                 if(dTimeC) dTimeC.innerText = this.formatTime(time);
-                if(dTimeT) dTimeT.innerText = this.formatTime(duration);
+                if(dTimeT && duration) dTimeT.innerText = this.formatTime(duration);
+
+                // --- In-Card Player (Only for active song) ---
+                if (this.activeId !== null) {
+                    const prog = document.getElementById(`progress-${this.activeId}`);
+                    const thumb = document.getElementById(`thumb-${this.activeId}`);
+                    const tCur = document.getElementById(`time-cur-${this.activeId}`);
+                    
+                    if(prog) prog.style.width = `${pct}%`;
+                    if(thumb) thumb.style.left = `${pct}%`;
+                    if(tCur) tCur.innerText = this.formatTime(time);
+                }
             },
 
             updateVolumeUI() {
@@ -721,13 +737,12 @@
 
             renderSongs() {
                 const c = document.getElementById('song-container');
-                // The HTML below uses Responsive prefixes (md:) to switch between "Mobile List" and "Desktop Vinyl Card" styles
                 c.innerHTML = songs.map((s, i) => `
                     <div class="glass-panel rounded-xl md:rounded-2xl p-4 md:p-8 flex gap-4 md:gap-8 items-center md:items-start group transition-colors relative overflow-hidden card-fade-item" data-id="${s.id}">
                         <!-- Desktop Blob BG -->
                         <div class="hidden md:block absolute -right-20 -top-20 w-64 h-64 bg-otter-accent/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
 
-                        <!-- Image Container: Adapts from simple square (mobile) to large vinyl (desktop) -->
+                        <!-- Image Container -->
                         <div class="relative shrink-0 w-20 h-20 md:w-40 md:h-40">
                             <div id="vinyl-${s.id}" class="vinyl-spin w-full h-full rounded-lg md:rounded-full overflow-hidden shadow-xl relative z-10 transition-transform duration-700">
                                 <div class="absolute inset-0 bg-black"></div>
@@ -757,7 +772,7 @@
                                 <p class="text-gray-500 text-sm leading-relaxed">${s.description}</p>
                             </div>
 
-                            <!-- Mobile Socials (Small icons below title) -->
+                            <!-- Mobile Socials -->
                             <div class="flex md:hidden gap-3 mb-2 text-gray-500 text-xs">
                                 ${s.spotifyUrl ? `<a href="${s.spotifyUrl}" target="_blank" class="hover:text-green-400"><i class="fab fa-spotify"></i> Spotify</a>` : ''}
                                 ${s.youtubeUrl ? `<a href="${s.youtubeUrl}" target="_blank" class="hover:text-red-400"><i class="fab fa-youtube"></i> YouTube</a>` : ''}
@@ -784,8 +799,6 @@
                                         <span id="time-dur-${s.id}">${s.duration}</span>
                                     </div>
                                 </div>
-                                <!-- Hidden Audio Engine Container -->
-                                <div id="ws-container-${s.id}" class="hidden"></div>
                             </div>
                         </div>
                     </div>
