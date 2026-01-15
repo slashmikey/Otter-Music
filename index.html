@@ -23,8 +23,6 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <!-- REMOVED WaveSurfer.js - Using Native Audio for better Drive compatibility -->
-
     <script>
         tailwind.config = {
             theme: {
@@ -116,7 +114,6 @@
             background: rgba(20, 19, 24, 0.98);
             border-top: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 -4px 30px rgba(0,0,0,0.4);
-            /* Handle Safe Areas for iPhone X+ */
             padding-bottom: max(12px, env(safe-area-inset-bottom));
         }
 
@@ -137,17 +134,6 @@
         }
         #sticky-player.visible { transform: translateY(0); }
 
-        /* Loader */
-        .loader {
-            border: 2px solid rgba(255,255,255,0.1);
-            border-left-color: #cba172;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -155,11 +141,7 @@
             overflow: hidden;
         }
 
-        /* Lightbox */
-        #lightbox { transition: opacity 0.3s ease; }
-        #lightbox.open { opacity: 1; pointer-events: auto; }
-
-        /* --- Spotify-like Volume Slider (Desktop Only) --- */
+        /* --- Spotify-like Volume Slider --- */
         .volume-control-group { display: none; }
         @media (min-width: 768px) {
             .volume-control-group { display: flex; }
@@ -189,7 +171,7 @@
                 box-shadow: 0 2px 4px rgba(0,0,0,0.3);
                 opacity: 0;
                 transition: opacity 0.2s, transform 0.2s;
-                margin-top: -4px; /* Align center */
+                margin-top: -4px;
             }
             .volume-range::-moz-range-thumb {
                 width: 12px;
@@ -202,19 +184,13 @@
             }
             .volume-control-group:hover .volume-range::-webkit-slider-thumb { opacity: 1; }
             .volume-control-group:hover .volume-range::-moz-range-thumb { opacity: 1; }
-            
-            .volume-range:active::-webkit-slider-thumb { transform: scale(1.1); }
         }
     </style>
 </head>
 <body class="bg-otter-dark text-gray-200 font-sans antialiased pb-32 md:pb-24 selection:bg-otter-accent selection:text-black">
 
-    <div id="a11y-announcer" class="sr-only" aria-live="polite"></div>
-
-    <!-- Navbar -->
     <nav class="fixed top-0 w-full z-50 glass-nav" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
-            <!-- Logo -->
             <a href="#" class="flex items-center gap-3 group z-20 shrink-0 p-1" aria-label="Home">
                 <div class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-otter-accent/40 group-hover:border-otter-accent transition-colors">
                     <img src="https://i.postimg.cc/Hsfv2Lb4/logo.png" alt="" class="w-full h-full object-cover">
@@ -222,7 +198,6 @@
                 <span class="font-display font-bold text-lg sm:text-xl text-white group-hover:text-otter-accent transition-colors hidden xs:block">Otter Music</span>
             </a>
             
-            <!-- Mobile: Scrollable Menu | Desktop: Standard Menu -->
             <div class="flex items-center gap-4 sm:gap-8 text-sm font-medium tracking-wide overflow-x-auto no-scrollbar ml-auto pl-2">
                 <a href="#featured" class="nav-link hover:text-otter-accent transition-colors whitespace-nowrap py-2 px-1">Featured</a>
                 <a href="#discography" class="nav-link hover:text-otter-accent transition-colors whitespace-nowrap py-2 px-1">Discography</a>
@@ -234,17 +209,9 @@
         </div>
     </nav>
 
-    <!-- Lightbox -->
-    <div id="lightbox" class="fixed inset-0 z-[200] bg-black/95 opacity-0 pointer-events-none flex items-center justify-center p-4 backdrop-blur-sm">
-        <button onclick="UI.closeLightbox()" class="absolute top-6 right-6 text-white/50 hover:text-white tap-target text-3xl transition-colors">
-            <i class="fas fa-times"></i>
-        </button>
-        <img id="lightbox-img" src="" alt="Full screen view" class="max-h-[90vh] max-w-full object-contain rounded-md shadow-2xl">
-    </div>
-
     <!-- Email Modal -->
     <div id="email-modal" class="fixed inset-0 z-[120] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-otter-card border border-white/10 rounded-2xl p-8 max-w-sm w-full text-center relative transform scale-95 transition-all duration-300 shadow-[0_0_50px_rgba(203,161,114,0.15)]" id="email-modal-content">
+        <div class="bg-otter-card border border-white/10 rounded-2xl p-8 max-w-sm w-full text-center relative transform scale-95 transition-all duration-300" id="email-modal-content">
             <button onclick="UI.closeEmailModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white tap-target w-10 h-10 flex items-center justify-center">
                 <i class="fas fa-times"></i>
             </button>
@@ -253,12 +220,8 @@
             </div>
             <h3 class="font-display text-2xl font-bold text-white mb-2">Contact Me</h3>
             <div class="space-y-3 mt-6">
-                 <a href="mailto:lalitachoudhuri18@gmail.com" class="flex items-center justify-center w-full py-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium tap-target">
-                    Default App
-                </a>
-                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=lalitachoudhuri18@gmail.com" target="_blank" class="flex items-center justify-center w-full py-3.5 rounded-xl bg-[#EA4335] text-white font-medium tap-target">
-                    <i class="fab fa-google mr-2"></i> Gmail
-                </a>
+                <a href="mailto:lalitachoudhuri18@gmail.com" class="flex items-center justify-center w-full py-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium tap-target">Default App</a>
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=lalitachoudhuri18@gmail.com" target="_blank" class="flex items-center justify-center w-full py-3.5 rounded-xl bg-[#EA4335] text-white font-medium tap-target"><i class="fab fa-google mr-2"></i> Gmail</a>
             </div>
         </div>
     </div>
@@ -271,7 +234,7 @@
         <div class="min-h-screen flex flex-col items-center justify-center p-6 relative">
              <div class="max-w-3xl mx-auto relative z-10 text-center py-20">
                 <div class="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-otter-accent/20 mb-8 shadow-2xl">
-                    <img src="https://i.postimg.cc/sxm2926S/image-4-0.png" alt="Otter" class="w-full h-full object-cover" loading="lazy">
+                    <img src="https://i.postimg.cc/sxm2926S/image-4-0.png" alt="Otter" class="w-full h-full object-cover">
                 </div>
                 <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">Hreeshyat Talukdar</h2>
                 <h3 class="font-sans text-otter-accent text-xl tracking-widest uppercase mb-10">Stage Identity: Otter</h3>
@@ -279,32 +242,11 @@
                     <p class="glass-panel p-8 rounded-2xl border-l-4 border-otter-accent text-left">
                         Hreeshyat Talukdar (Otter) is a 19-year-old independent artist from Assam, India. Blending modern pop textures with cinematic atmospheres.
                     </p>
-                    <p class="text-left">
-                        Working with AI-powered tools like <span class="text-white font-medium">Suno AI</span> and <span class="text-white font-medium">ElevenLabs</span>.
-                    </p>
-                </div>
-                <!-- Gallery Grid -->
-                <div class="w-full mt-12 mb-8">
-                    <h4 class="text-left text-white font-display text-2xl font-bold mb-6 border-b border-white/10 pb-2">Gallery</h4>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/sxm2926S/image-4-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.02] transition-transform">
-                             <img src="https://i.postimg.cc/sxm2926S/image-4-0.png" class="w-full h-full object-cover">
-                        </button>
-                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/1X3SSrBy/image-5-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.02] transition-transform">
-                             <img src="https://i.postimg.cc/1X3SSrBy/image-5-0.png" class="w-full h-full object-cover">
-                        </button>
-                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/hPwnFx7Z/image-3-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.02] transition-transform">
-                             <img src="https://i.postimg.cc/hPwnFx7Z/image-3-0.png" class="w-full h-full object-cover">
-                        </button>
-                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/TwC8tW6z/image-2-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.02] transition-transform">
-                             <img src="https://i.postimg.cc/TwC8tW6z/image-2-0.png" class="w-full h-full object-cover">
-                        </button>
-                    </div>
                 </div>
                 <div class="mt-12 flex justify-center gap-6 flex-wrap">
-                    <a href="https://www.instagram.com/hrees_tal_official/" target="_blank" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 tap-target border border-white/10"><i class="fab fa-instagram"></i></a>
-                    <a href="https://open.spotify.com/artist/7s2q30BhMkSui7m3p8n03t" target="_blank" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#1DB954] tap-target border border-white/10"><i class="fab fa-spotify"></i></a>
-                    <a href="https://www.youtube.com/@ottermusicind" target="_blank" class="w-12 h-12 rounded-full bg-otter-accent text-otter-dark font-bold hover:scale-105 tap-target"><i class="fab fa-youtube"></i></a>
+                    <a href="https://www.instagram.com/hrees_tal_official/" target="_blank" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 border border-white/10"><i class="fab fa-instagram"></i></a>
+                    <a href="https://open.spotify.com/artist/7s2q30BhMkSui7m3p8n03t" target="_blank" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#1DB954] border border-white/10"><i class="fab fa-spotify"></i></a>
+                    <a href="https://www.youtube.com/@ottermusicind" target="_blank" class="w-12 h-12 rounded-full bg-otter-accent text-otter-dark font-bold hover:scale-105"><i class="fab fa-youtube"></i></a>
                 </div>
             </div>
         </div>
@@ -315,16 +257,15 @@
         <div class="absolute inset-0 bg-otter-dark">
             <div class="absolute top-0 left-1/4 w-96 h-96 bg-otter-accent/10 rounded-full blur-[120px]"></div>
             <div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[120px]"></div>
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
         </div>
         <div class="relative z-10 text-center max-w-4xl mx-auto" id="featured">
-            <h1 class="font-display text-4xl sm:text-5xl md:text-8xl font-bold text-white mb-8 leading-tight opacity-0 animate-fade-in-up" style="animation-delay: 0.4s;">
+            <h1 class="font-display text-4xl sm:text-5xl md:text-8xl font-bold text-white mb-8 leading-tight animate-fade-in-up">
                 Music for every <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-otter-accent to-white">moment</span>
             </h1>
-            <p class="text-base md:text-lg text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed opacity-0 animate-fade-in-up" style="animation-delay: 0.6s;">
+            <p class="text-base md:text-lg text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style="animation-delay: 0.2s;">
                 Redefining the auditory experience. Built for the deep listeners.
             </p>
-            <div class="opacity-0 animate-fade-in-up" style="animation-delay: 0.8s;">
+            <div class="animate-fade-in-up" style="animation-delay: 0.4s;">
                 <a href="#discography" class="inline-block px-10 py-4 bg-otter-accent text-otter-dark font-bold rounded-full hover:bg-white hover:scale-105 transition-all shadow-lg shadow-otter-accent/20 tap-target">
                     Listen Now
                 </a>
@@ -345,7 +286,6 @@
     <!-- Sticky Mini Player -->
     <div id="sticky-player" class="fixed bottom-0 left-0 w-full glass-sticky z-[90] px-4 py-3 hidden">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 md:gap-4">
-            <!-- Left: Info -->
             <div class="flex items-center gap-3 w-1/3 md:w-1/4 min-w-[120px] overflow-hidden">
                 <img id="sticky-cover" src="" class="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover bg-gray-800 shrink-0">
                 <div class="overflow-hidden">
@@ -354,48 +294,33 @@
                 </div>
             </div>
             
-            <!-- Center: Controls -->
             <div class="flex-grow max-w-xl flex flex-col items-center gap-1">
                 <div class="flex items-center gap-4 md:gap-6">
-                    <button onclick="AudioController.skip(-5)" class="text-gray-400 hover:text-white p-2 tap-target h-auto w-auto">
-                        <i class="fas fa-backward"></i>
-                    </button>
-                    <button id="sticky-play-btn" onclick="AudioController.togglePlay()" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white text-black flex items-center justify-center hover:bg-otter-accent transition-colors tap-target shadow-lg relative">
-                        <i class="fas fa-play ml-0.5"></i>
-                    </button>
-                    <button onclick="AudioController.skip(5)" class="text-gray-400 hover:text-white p-2 tap-target h-auto w-auto">
-                        <i class="fas fa-forward"></i>
-                    </button>
+                    <button onclick="AudioController.skip(-5)" class="text-gray-400 hover:text-white p-2"><i class="fas fa-backward"></i></button>
+                    <button id="sticky-play-btn" onclick="AudioController.togglePlay()" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white text-black flex items-center justify-center hover:bg-otter-accent transition-colors shadow-lg"><i class="fas fa-play ml-0.5"></i></button>
+                    <button onclick="AudioController.skip(5)" class="text-gray-400 hover:text-white p-2"><i class="fas fa-forward"></i></button>
                 </div>
-                <!-- Desktop Progress (Hidden on mobile) -->
-                <div class="hidden md:flex w-full items-center gap-2 text-[10px] text-gray-400 font-montserrat tabular-nums cursor-pointer group/progress" onclick="AudioController.seekFromSticky(event)">
+                <div class="hidden md:flex w-full items-center gap-2 text-[10px] text-gray-400 font-montserrat tabular-nums cursor-pointer" onclick="AudioController.seekFromSticky(event)">
                     <span id="sticky-time-current">0:00</span>
-                    <div class="relative flex-grow h-1.5 bg-white/10 rounded-full overflow-hidden hover:h-2 transition-all">
+                    <div class="relative flex-grow h-1.5 bg-white/10 rounded-full overflow-hidden">
                         <div id="sticky-progress-bar-desktop" class="absolute top-0 left-0 h-full bg-otter-accent w-0"></div>
                     </div>
                     <span id="sticky-time-total">0:00</span>
                 </div>
             </div>
 
-            <!-- Right: Volume/Misc -->
             <div class="w-1/3 md:w-1/4 flex justify-end items-center gap-2 text-[10px] text-gray-400 font-montserrat tabular-nums">
-                <!-- Mobile Time Display -->
                 <div class="md:hidden" id="sticky-time-display-mobile">0:00</div>
-                
-                <!-- Desktop Volume -->
                 <div class="volume-control-group items-center gap-2">
-                    <button onclick="AudioController.toggleMute()" class="w-6 flex items-center justify-center hover:text-white focus:outline-none">
-                        <i id="volume-icon" class="fas fa-volume-up"></i>
-                    </button>
+                    <button onclick="AudioController.toggleMute()" class="w-6 flex items-center justify-center hover:text-white"><i id="volume-icon" class="fas fa-volume-up"></i></button>
                     <div class="volume-slider-wrapper">
                         <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" class="volume-range" oninput="AudioController.setVolume(this.value)">
                     </div>
                 </div>
             </div>
             
-            <!-- Mobile Progress Bar (Absolute Bottom) -->
-            <div class="md:hidden absolute top-0 left-0 w-full h-1 bg-white/5 cursor-pointer" onclick="AudioController.seekFromSticky(event)">
-                <div id="sticky-progress-bar-mobile" class="h-full bg-otter-accent w-0 transition-all duration-100"></div>
+            <div class="md:hidden absolute top-0 left-0 w-full h-1 bg-white/5" onclick="AudioController.seekFromSticky(event)">
+                <div id="sticky-progress-bar-mobile" class="h-full bg-otter-accent w-0"></div>
             </div>
         </div>
     </div>
@@ -403,25 +328,23 @@
     <!-- Footer -->
     <footer id="about" class="bg-black/50 border-t border-white/5 pt-12 pb-24 md:pt-20 md:pb-10">
         <div class="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
-            <div class="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-otter-accent/30 mb-6 md:mb-8">
-                <img src="https://i.postimg.cc/Hsfv2Lb4/logo.png" alt="Logo" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" loading="lazy">
+            <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-otter-accent/30 mb-6">
+                <img src="https://i.postimg.cc/Hsfv2Lb4/logo.png" alt="Logo" class="w-full h-full object-cover">
             </div>
             <h3 class="font-display text-2xl font-bold text-white mb-4">Otter Music</h3>
             <p class="text-gray-400 max-w-2xl mb-8 leading-relaxed font-light text-sm px-4">
                 Otter Music is not about perfection — it’s about exploration, fun, and pushing creative boundaries.
             </p>
             <div class="flex gap-6 mb-12">
-                <a href="https://www.instagram.com/hrees_tal_official/" target="_blank" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-gradient-to-tr hover:from-purple-500 hover:to-pink-500 hover:text-white transition-all text-white/70 tap-target border border-white/10"><i class="fab fa-instagram"></i></a>
-                <a href="https://www.youtube.com/@ottermusicind" target="_blank" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#FF0000] hover:text-white transition-all text-white/70 tap-target border border-white/10"><i class="fab fa-youtube"></i></a>
-                <button onclick="UI.openEmailModal()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-otter-accent hover:text-black transition-all text-white/70 tap-target border border-white/10"><i class="fas fa-envelope"></i></button>
+                <a href="https://www.instagram.com/hrees_tal_official/" target="_blank" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-otter-accent hover:text-black border border-white/10"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.youtube.com/@ottermusicind" target="_blank" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-red-600 border border-white/10"><i class="fab fa-youtube"></i></a>
+                <button onclick="UI.openEmailModal()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-otter-accent hover:text-black border border-white/10"><i class="fas fa-envelope"></i></button>
             </div>
-            <p class="text-gray-600 text-xs md:text-sm">&copy; 2026 Otter Music. All rights reserved.</p>
+            <p class="text-gray-600 text-xs">&copy; 2026 Otter Music. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- Logic -->
     <script>
-        // Data
         const songs = [
             {
                 id: 0,
@@ -434,6 +357,18 @@
                 youtubeUrl: "https://youtu.be/ljycK6_2Fhk",
                 previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Moonlight%20Between%20US%20%5B30%20s%20Preview%5D.mp3",
                 duration: "0:27"
+            },
+            {
+                id: 5,
+                title: "One side",
+                artist: "Otter",
+                cover: "https://i.postimg.cc/dQWCNtRq/11112.jpg",
+                releaseDate: "Soon",
+                description: "A one sided love song based pop style with modern edm romanticizing purity of love added with male vocals givng a heart touching vibe",
+                spotifyUrl: "",
+                youtubeUrl: "https://youtu.be/Gd6PXbPJX0E",
+                previewUrl: "https://image2url.com/r2/default/audio/1768455113011-3516a700-503c-4f36-8e46-fa6ff3a7d605.mp3",
+                duration: "0:33"
             },
             {
                 id: 1,
@@ -481,18 +416,16 @@
                 spotifyUrl: "",
                 youtubeUrl: "https://youtu.be/AhDdYhLde1w",
                 previewUrl: "https://image2url.com/r2/default/audio/1768207896259-efaed209-7e51-40ed-9d59-6c964abce5da.mp3",
-                duration: "0:30"
+                duration: "0:45"
             }
         ];
 
-        // --- Native Audio Module (Replaced WaveSurfer) ---
         const AudioController = {
             audio: new Audio(),
             activeId: null,
             volume: 0.5,
 
             init() {
-                // REMOVED crossOrigin="anonymous" to allow standard opaque response playback from Google Drive
                 this.audio.preload = "auto";
                 this.setupAudioListeners();
                 this.setupKeyboardShortcuts();
@@ -510,7 +443,7 @@
                 this.audio.addEventListener('ended', () => {
                     this.updateUI(this.activeId, false);
                     this.audio.currentTime = 0;
-                    this.updateProgress(0, 0); // Reset progress visually
+                    this.updateProgress(0, 0);
                 });
                 
                 this.audio.addEventListener('play', () => {
@@ -522,19 +455,13 @@
                      this.updateUI(this.activeId, false);
                 });
 
-                // Detailed Error Logging
-                this.audio.addEventListener('error', (e) => {
-                    const err = e.target.error;
-                    let msg = "Unknown Error";
-                    if (err) {
-                        switch (err.code) {
-                            case err.MEDIA_ERR_ABORTED: msg = "Aborted"; break;
-                            case err.MEDIA_ERR_NETWORK: msg = "Network Error"; break;
-                            case err.MEDIA_ERR_DECODE: msg = "Decode Error"; break;
-                            case err.MEDIA_ERR_SRC_NOT_SUPPORTED: msg = "Source Not Supported (Likely 403 or Invalid Format)"; break;
-                        }
+                this.audio.addEventListener('loadedmetadata', () => {
+                    if (this.activeId !== null) {
+                        const durEl = document.getElementById(`time-dur-${this.activeId}`);
+                        if (durEl) durEl.innerText = this.formatTime(this.audio.duration);
+                        const stickyDur = document.getElementById('sticky-time-total');
+                        if (stickyDur) stickyDur.innerText = this.formatTime(this.audio.duration);
                     }
-                    console.error("Audio Error:", msg, e);
                 });
             },
 
@@ -544,47 +471,35 @@
 
                 if (this.activeId === id) {
                     if (this.audio.paused) {
-                        try {
-                           await this.audio.play();
-                        } catch(e) { console.error("Play error:", e); }
+                        this.audio.play().catch(e => console.error(e));
                     } else {
                         this.audio.pause();
                     }
                 } else {
                     this.activeId = id;
-                    // Reset UI of previous
                     document.querySelectorAll('.play-btn').forEach(b => b.innerHTML = '<i class="fas fa-play ml-0.5"></i>');
-                    
                     this.audio.src = song.previewUrl;
-                    this.audio.load(); // Ensure new source is loaded
-                    
-                    try {
-                        await this.audio.play();
-                    } catch (e) {
-                         console.error("Playback failed (likely standard play() interruption or source error):", e);
-                         this.updateUI(id, false);
-                    }
+                    this.audio.load();
+                    this.audio.play().catch(e => {
+                        console.error(e);
+                        this.updateUI(id, false);
+                    });
                     this.showSticky(id);
                 }
             },
 
             togglePlay() {
                 if (this.activeId !== null) {
-                    if (this.audio.paused) {
-                        this.audio.play().catch(e => console.error("Resume error:", e));
-                    } else {
-                        this.audio.pause();
-                    }
+                    if (this.audio.paused) this.audio.play();
+                    else this.audio.pause();
                 }
             },
 
             seek(e, id) {
                 e.stopPropagation();
-                // If clicking a bar of a song that isn't playing, start it
                 if (this.activeId !== id) {
-                     this.toggle(id);
-                     // Allow a brief moment for src to set before seeking
-                     setTimeout(() => this.seekLogic(e), 100);
+                    this.toggle(id);
+                    setTimeout(() => this.seekLogic(e), 150);
                 } else {
                     this.seekLogic(e);
                 }
@@ -592,29 +507,19 @@
 
             seekLogic(e) {
                 const rect = e.currentTarget.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const pct = Math.max(0, Math.min(1, x / rect.width));
-                if (this.audio.duration) {
-                    this.audio.currentTime = pct * this.audio.duration;
-                }
+                const pct = (e.clientX - rect.left) / rect.width;
+                if (this.audio.duration) this.audio.currentTime = pct * this.audio.duration;
             },
 
             seekFromSticky(e) {
                 if (this.activeId !== null) {
                     const rect = e.currentTarget.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const pct = Math.max(0, Math.min(1, x / rect.width));
-                    if (this.audio.duration) {
-                        this.audio.currentTime = pct * this.audio.duration;
-                    }
+                    const pct = (e.clientX - rect.left) / rect.width;
+                    if (this.audio.duration) this.audio.currentTime = pct * this.audio.duration;
                 }
             },
 
-            skip(sec) {
-                if (this.activeId !== null) {
-                    this.audio.currentTime += sec;
-                }
-            },
+            skip(sec) { if (this.activeId !== null) this.audio.currentTime += sec; },
 
             setVolume(val) {
                 this.volume = val;
@@ -625,8 +530,6 @@
             toggleMute() {
                 const newVol = this.volume > 0 ? 0 : 0.5;
                 this.setVolume(newVol);
-                const s = document.getElementById('volume-slider');
-                if(s) s.value = newVol;
             },
 
             updateUI(id, isPlaying) {
@@ -634,10 +537,6 @@
                 const stickyBtn = document.getElementById('sticky-play-btn');
                 const vinyl = document.getElementById(`vinyl-${id}`);
 
-                // Reset all other Play Buttons & Vinyls
-                document.querySelectorAll('.play-btn').forEach(b => {
-                     if(b.id !== `btn-${id}`) b.innerHTML = '<i class="fas fa-play ml-0.5"></i>';
-                });
                 document.querySelectorAll('.vinyl-spin').forEach(v => {
                     if(v.id !== `vinyl-${id}`) {
                         v.classList.remove('playing-spin', 'animate-spin-slow'); 
@@ -671,26 +570,19 @@
 
             updateProgress(time, duration) {
                 const pct = duration > 0 ? (time / duration) * 100 : 0;
-                
-                // --- Sticky Player ---
                 const dBar = document.getElementById('sticky-progress-bar-desktop');
                 const mBar = document.getElementById('sticky-progress-bar-mobile');
-                const mTime = document.getElementById('sticky-time-display-mobile');
                 const dTimeC = document.getElementById('sticky-time-current');
-                const dTimeT = document.getElementById('sticky-time-total');
-
+                
                 if(dBar) dBar.style.width = `${pct}%`;
                 if(mBar) mBar.style.width = `${pct}%`;
-                if(mTime) mTime.innerText = this.formatTime(time);
                 if(dTimeC) dTimeC.innerText = this.formatTime(time);
-                if(dTimeT && duration) dTimeT.innerText = this.formatTime(duration);
+                document.getElementById('sticky-time-display-mobile').innerText = this.formatTime(time);
 
-                // --- In-Card Player (Only for active song) ---
                 if (this.activeId !== null) {
                     const prog = document.getElementById(`progress-${this.activeId}`);
                     const thumb = document.getElementById(`thumb-${this.activeId}`);
                     const tCur = document.getElementById(`time-cur-${this.activeId}`);
-                    
                     if(prog) prog.style.width = `${pct}%`;
                     if(thumb) thumb.style.left = `${pct}%`;
                     if(tCur) tCur.innerText = this.formatTime(time);
@@ -702,7 +594,7 @@
                 if(s) {
                     s.value = this.volume;
                     const p = this.volume * 100;
-                    s.style.background = `linear-gradient(to right, #cba172 0%, #cba172 ${p}%, rgba(255,255,255,0.2) ${p}%, rgba(255,255,255,0.2) 100%)`;
+                    s.style.background = `linear-gradient(to right, #cba172 ${p}%, rgba(255,255,255,0.2) ${p}%)`;
                 }
                 const icon = document.getElementById('volume-icon');
                 if(icon) icon.className = this.volume === 0 ? 'fas fa-volume-mute' : 'fas fa-volume-up';
@@ -722,13 +614,11 @@
 
             setupKeyboardShortcuts() {
                 document.addEventListener('keydown', (e) => {
-                    if (document.body.classList.contains('modal-open')) return;
                     if (e.code === 'Space') { e.preventDefault(); this.togglePlay(); }
                 });
             }
         };
 
-        // UI Manager
         const UI = {
             init() {
                 this.renderSongs();
@@ -737,63 +627,49 @@
 
             renderSongs() {
                 const c = document.getElementById('song-container');
-                c.innerHTML = songs.map((s, i) => `
-                    <div class="glass-panel rounded-xl md:rounded-2xl p-4 md:p-8 flex gap-4 md:gap-8 items-center md:items-start group transition-colors relative overflow-hidden card-fade-item" data-id="${s.id}">
-                        <!-- Desktop Blob BG -->
-                        <div class="hidden md:block absolute -right-20 -top-20 w-64 h-64 bg-otter-accent/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
-
-                        <!-- Image Container -->
+                c.innerHTML = songs.map((s) => `
+                    <div class="glass-panel rounded-xl md:rounded-2xl p-4 md:p-8 flex gap-4 md:gap-8 items-center md:items-start group transition-colors relative overflow-hidden card-fade-item">
                         <div class="relative shrink-0 w-20 h-20 md:w-40 md:h-40">
                             <div id="vinyl-${s.id}" class="vinyl-spin w-full h-full rounded-lg md:rounded-full overflow-hidden shadow-xl relative z-10 transition-transform duration-700">
                                 <div class="absolute inset-0 bg-black"></div>
-                                <img src="${s.cover}" class="w-full h-full object-cover opacity-80" loading="${i<2?'eager':'lazy'}">
-                                <!-- Vinyl Hole (Desktop only) -->
+                                <img src="${s.cover}" class="w-full h-full object-cover opacity-80" loading="lazy">
                                 <div class="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-otter-card rounded-full border-2 border-otter-accent/50 z-20"></div>
-                                <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent"></div>
                             </div>
                         </div>
 
-                        <!-- Content -->
                         <div class="flex-grow min-w-0 z-10 flex flex-col justify-center">
-                            <div class="flex justify-between items-start mb-2 md:mb-4">
+                            <div class="flex justify-between items-start mb-2">
                                 <div>
-                                    <h3 class="font-display font-bold text-lg md:text-3xl text-white truncate pr-2 md:mb-1">${s.title}</h3>
-                                    <p class="text-xs md:text-lg text-otter-accent uppercase tracking-wider md:normal-case font-medium">${s.artist}</p>
+                                    <h3 class="font-display font-bold text-lg md:text-3xl text-white truncate">${s.title}</h3>
+                                    <p class="text-xs md:text-lg text-otter-accent font-medium">${s.artist}</p>
                                 </div>
-                                <!-- Desktop Socials -->
                                 <div class="hidden md:flex gap-2 shrink-0">
                                     ${s.spotifyUrl ? `<a href="${s.spotifyUrl}" target="_blank" class="text-white/60 hover:text-[#1DB954] p-2 transition-colors"><i class="fab fa-spotify text-2xl"></i></a>` : ''}
                                     ${s.youtubeUrl ? `<a href="${s.youtubeUrl}" target="_blank" class="text-white/60 hover:text-[#FF0000] p-2 transition-colors"><i class="fab fa-youtube text-2xl"></i></a>` : ''}
                                 </div>
                             </div>
 
-                            <!-- Description (Desktop) -->
                             <div class="hidden md:block mb-6 max-w-2xl">
                                 <p class="text-gray-500 text-sm leading-relaxed">${s.description}</p>
                             </div>
 
                             <!-- Mobile Socials -->
                             <div class="flex md:hidden gap-3 mb-2 text-gray-500 text-xs">
-                                ${s.spotifyUrl ? `<a href="${s.spotifyUrl}" target="_blank" class="hover:text-green-400"><i class="fab fa-spotify"></i> Spotify</a>` : ''}
-                                ${s.youtubeUrl ? `<a href="${s.youtubeUrl}" target="_blank" class="hover:text-red-400"><i class="fab fa-youtube"></i> YouTube</a>` : ''}
+                                ${s.spotifyUrl ? `<a href="${s.spotifyUrl}" target="_blank" class="hover:text-[#1DB954]"><i class="fab fa-spotify"></i> Spotify</a>` : ''}
+                                ${s.youtubeUrl ? `<a href="${s.youtubeUrl}" target="_blank" class="hover:text-[#FF0000]"><i class="fab fa-youtube"></i> YouTube</a>` : ''}
                             </div>
 
                             <div class="flex items-center gap-4 mt-2">
-                                <button id="btn-${s.id}" onclick="AudioController.toggle(${s.id})" class="play-btn w-10 h-10 md:w-12 md:h-12 rounded-full bg-otter-accent text-black flex items-center justify-center shrink-0 hover:scale-105 hover:bg-white transition-all shadow-lg tap-target">
+                                <button id="btn-${s.id}" onclick="AudioController.toggle(${s.id})" class="play-btn w-10 h-10 md:w-12 md:h-12 rounded-full bg-otter-accent text-black flex items-center justify-center shrink-0 hover:scale-105 transition-all shadow-lg">
                                     <i class="fas fa-play ml-0.5"></i>
                                 </button>
                                 
                                 <div class="flex-grow flex flex-col justify-center gap-1 group/bar">
-                                    <!-- Spotify-style Progress Bar -->
                                     <div class="relative w-full h-1 bg-white/10 rounded-full cursor-pointer py-2 bg-clip-content" onclick="AudioController.seek(event, ${s.id})">
-                                        <!-- Track -->
                                         <div class="absolute top-1/2 -translate-y-1/2 left-0 w-full h-1 bg-white/10 rounded-full"></div>
-                                        <!-- Fill -->
-                                        <div id="progress-${s.id}" class="absolute top-1/2 -translate-y-1/2 left-0 h-1 bg-otter-accent rounded-full w-0 pointer-events-none transition-all duration-75 ease-linear"></div>
-                                        <!-- Thumb (Hover) -->
-                                        <div id="thumb-${s.id}" class="absolute top-1/2 -translate-y-1/2 -ml-1.5 left-0 w-3 h-3 bg-white rounded-full opacity-0 group-hover/bar:opacity-100 transition-opacity shadow pointer-events-none"></div>
+                                        <div id="progress-${s.id}" class="absolute top-1/2 -translate-y-1/2 left-0 h-1 bg-otter-accent rounded-full w-0 transition-all duration-75"></div>
+                                        <div id="thumb-${s.id}" class="absolute top-1/2 -translate-y-1/2 -ml-1.5 left-0 w-3 h-3 bg-white rounded-full opacity-0 group-hover/bar:opacity-100 transition-opacity"></div>
                                     </div>
-                                    <!-- Time -->
                                      <div class="flex justify-between text-[10px] text-gray-400 font-montserrat tabular-nums">
                                         <span id="time-cur-${s.id}">0:00</span>
                                         <span id="time-dur-${s.id}">${s.duration}</span>
@@ -803,7 +679,6 @@
                         </div>
                     </div>
                 `).join('');
-                
                 this.setupObservers();
             },
 
@@ -824,37 +699,19 @@
                 const nav = document.getElementById('navbar');
                 window.addEventListener('scroll', () => {
                     const current = window.pageYOffset;
-                    if(current > 50 && current > lastScroll) {
-                        nav.style.transform = 'translateY(-100%)';
-                    } else {
-                        nav.style.transform = 'translateY(0)';
-                    }
+                    nav.style.transform = (current > 50 && current > lastScroll) ? 'translateY(-100%)' : 'translateY(0)';
                     lastScroll = current;
                 });
             },
 
             openProfile() {
-                const p = document.getElementById('profile-view');
-                p.style.transform = 'translateX(0)';
+                document.getElementById('profile-view').style.transform = 'translateX(0)';
                 document.body.style.overflow = 'hidden';
             },
 
             closeProfile() {
-                const p = document.getElementById('profile-view');
-                p.style.transform = 'translateX(100%)';
+                document.getElementById('profile-view').style.transform = 'translateX(100%)';
                 document.body.style.overflow = '';
-            },
-
-            openLightbox(btn) {
-                const img = document.getElementById('lightbox-img');
-                img.src = btn.getAttribute('data-src');
-                const lb = document.getElementById('lightbox');
-                lb.classList.remove('pointer-events-none', 'opacity-0');
-            },
-
-            closeLightbox() {
-                const lb = document.getElementById('lightbox');
-                lb.classList.add('pointer-events-none', 'opacity-0');
             },
 
             openEmailModal() {
