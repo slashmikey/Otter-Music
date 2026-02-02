@@ -189,6 +189,12 @@
             .volume-control-group:hover .volume-range::-webkit-slider-thumb { opacity: 1; }
             .volume-control-group:hover .volume-range::-moz-range-thumb { opacity: 1; }
         }
+
+        /* Language Toggle Style */
+        .lang-btn.active {
+            color: #cba172;
+            border-bottom: 2px solid #cba172;
+        }
     </style>
 </head>
 <body class="bg-otter-dark text-gray-200 font-sans antialiased pb-32 md:pb-24 selection:bg-otter-accent selection:text-black">
@@ -394,6 +400,22 @@
 
     <script>
         const songs = [
+            {
+                id: 10,
+                title: "Kaamuki",
+                artist: "Otter",
+                cover: "https://i.postimg.cc/tTFxbPb4/Njnjfnejfne-Kamaki.jpg",
+                releaseDate: "Soon",
+                description: "A love song with cross auditory journey made in R&B style with a pop touch made with dreamy, youthful and intimate romance. Made in three different language : Malayalam (Original) , Hindi and English.",
+                previewUrl: "https://image2url.com/r2/default/audio/1770020952717-71b0476a-abe5-440e-beb3-c790ea24e37d.mp3",
+                duration: "0:49",
+                variants: [
+                    { lang: "Malayalam (Original)", title: "Kaamuki", url: "https://image2url.com/r2/default/audio/1770020952717-71b0476a-abe5-440e-beb3-c790ea24e37d.mp3", duration: "0:49" },
+                    { lang: "Hindi", title: "Kaamuki (Hindi)", url: "https://image2url.com/r2/default/audio/1770020997990-bf65e36d-1a0f-429c-a142-6732a0051203.mp3", duration: "0:49" },
+                    { lang: "English", title: "Girl", url: "https://image2url.com/r2/default/audio/1770021041229-084b81b6-a2ae-4973-94dd-654a8ae67501.mp3", duration: "0:39" }
+                ],
+                activeVariant: 0
+            },
             {
                 id: 0,
                 title: "Moonlight Between Us",
@@ -724,7 +746,7 @@
             renderSongs() {
                 const c = document.getElementById('song-container');
                 c.innerHTML = songs.map((s) => `
-                    <div class="glass-panel rounded-xl md:rounded-2xl p-4 md:p-8 flex gap-4 md:gap-8 items-center md:items-start group transition-colors relative overflow-hidden card-fade-item">
+                    <div id="song-card-${s.id}" class="glass-panel rounded-xl md:rounded-2xl p-4 md:p-8 flex gap-4 md:gap-8 items-center md:items-start group transition-colors relative overflow-hidden card-fade-item">
                         <div class="relative shrink-0 w-20 h-20 md:w-40 md:h-40">
                             <div id="vinyl-${s.id}" class="vinyl-spin w-full h-full rounded-lg md:rounded-full overflow-hidden shadow-xl relative z-10 transition-transform duration-700">
                                 <div class="absolute inset-0 bg-black"></div>
@@ -736,7 +758,7 @@
                         <div class="flex-grow min-w-0 z-10 flex flex-col justify-center">
                             <div class="flex justify-between items-start mb-2">
                                 <div>
-                                    <h3 class="font-display font-bold text-lg md:text-3xl text-white truncate">${s.title}</h3>
+                                    <h3 id="title-${s.id}" class="font-display font-bold text-lg md:text-3xl text-white truncate">${s.title}</h3>
                                     <p class="text-xs md:text-lg text-otter-accent font-medium">${s.artist}</p>
                                 </div>
                                 <div class="hidden md:flex gap-2 shrink-0">
@@ -772,10 +794,66 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Multi-language support footer -->
+                            ${s.variants ? `
+                            <div class="flex gap-4 mt-4 text-[10px] uppercase font-bold text-gray-500 border-t border-white/5 pt-3">
+                                ${s.variants.map((v, idx) => `
+                                    <button 
+                                        onclick="UI.switchLanguage(${s.id}, ${idx})" 
+                                        class="lang-btn-${s.id} hover:text-otter-accent transition-all ${s.activeVariant === idx ? 'text-otter-accent' : ''}"
+                                        id="lang-btn-${s.id}-${idx}"
+                                    >
+                                        ${v.lang}
+                                    </button>
+                                `).join('')}
+                            </div>
+                            ` : ''}
                         </div>
                     </div>
                 `).join('');
                 this.setupObservers();
+            },
+
+            switchLanguage(songId, variantIdx) {
+                const song = songs.find(s => s.id === songId);
+                if (!song || !song.variants) return;
+
+                const variant = song.variants[variantIdx];
+                
+                // Update internal data
+                song.activeVariant = variantIdx;
+                song.title = variant.title;
+                song.previewUrl = variant.url;
+                song.duration = variant.duration; // Update current duration in data
+
+                // Update UI elements immediately
+                const titleEl = document.getElementById(`title-${songId}`);
+                if (titleEl) titleEl.innerText = variant.title;
+
+                const durEl = document.getElementById(`time-dur-${songId}`);
+                if (durEl) durEl.innerText = variant.duration;
+
+                // Handle Audio logic if it's the currently playing song
+                if (AudioController.activeId === songId) {
+                    const wasPlaying = !AudioController.audio.paused;
+                    AudioController.audio.src = variant.url;
+                    AudioController.audio.load();
+                    if (wasPlaying) {
+                        AudioController.audio.play();
+                    }
+                    // Update sticky player if visible
+                    const stickyTitle = document.getElementById('sticky-title');
+                    if (stickyTitle) stickyTitle.innerText = variant.title;
+                    
+                    const stickyDur = document.getElementById('sticky-time-total');
+                    if (stickyDur) stickyDur.innerText = variant.duration;
+                }
+
+                // Update variant button styles
+                document.querySelectorAll(`.lang-btn-${songId}`).forEach(btn => btn.classList.remove('text-otter-accent'));
+                const activeBtn = document.getElementById(`lang-btn-${songId}-${variantIdx}`);
+                if (activeBtn) activeBtn.classList.add('text-otter-accent');
             },
 
             setupObservers() {
