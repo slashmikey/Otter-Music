@@ -2,17 +2,15 @@
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <!-- Accessibility & Viewport: Removed user-scalable=no, added viewport-fit=cover for notches -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Otter Music | Soundscapes</title>
     
     <!-- Preload Critical Assets -->
     <link rel="preload" as="image" href="https://i.postimg.cc/Hsfv2Lb4/logo.png">
+    <link rel="preload" as="image" href="https://i.postimg.cc/85pmvdtg/logo-yt-(Assam).png">
     
     <!-- Website Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="https://i.postimg.cc/Hsfv2Lb4/logo.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="https://i.postimg.cc/Hsfv2Lb4/logo.png">
-    <link rel="apple-touch-icon" href="https://i.postimg.cc/Hsfv2Lb4/logo.png">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,7 +34,8 @@
                         'otter-dark': '#0f0e13',
                         'otter-card': '#16151a', 
                         'otter-accent': '#cba172',
-                        'otter-accent-hover': '#e0b686',
+                        'assam-red': '#8b0000',
+                        'assam-cream': '#f5f5dc',
                     },
                     screens: {
                         'xs': '480px',
@@ -44,6 +43,7 @@
                     animation: {
                         'spin-slow': 'spin-slow 8s linear infinite',
                         'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'pulse-subtle': 'pulse-subtle 2s ease-in-out infinite',
                     }
                 }
             }
@@ -56,59 +56,88 @@
             overflow-x: hidden;
             width: 100%;
             -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.5s ease;
         }
 
-        /* Desktop Scrollbar */
-        @media (min-width: 768px) {
-            ::-webkit-scrollbar { width: 8px; }
-            ::-webkit-scrollbar-track { background: #0f0e13; }
-            ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-            ::-webkit-scrollbar-thumb:hover { background: #cba172; }
+        /* Mode Transitions */
+        body.mode-assam { background-color: #120a0a; }
+        body.mode-assam .glass-panel { background: rgba(139, 0, 0, 0.05); border-color: rgba(139, 0, 0, 0.2); }
+        body.mode-assam .text-otter-accent { color: #ff4d4d; }
+        body.mode-assam .bg-otter-accent { background-color: #8b0000; color: white; }
+
+        /* Navigation Styles */
+        .glass-nav {
+            background: rgba(15, 14, 19, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease-in-out;
         }
 
-        /* Nav Scrollbar Hidden */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Mode Switch Button Style */
+        #assam-mode-btn {
+            background: rgba(203, 161, 114, 0.1);
+            border: 1px solid rgba(203, 161, 114, 0.3);
+            color: #cba172;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        @media (min-width: 640px) {
+            #assam-mode-btn { font-size: 11px; padding: 6px 14px; border-radius: 8px; }
+        }
+        #assam-mode-btn:hover { background: rgba(203, 161, 114, 0.2); border-color: #cba172; }
+        body.mode-assam #assam-mode-btn { background: #8b0000; border-color: #f5f5dc; color: #f5f5dc; }
 
-        /* Animations */
-        @keyframes spin-slow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .animate-spin-slow { animation: spin-slow 8s linear infinite; }
-        .paused-spin {
-            animation-play-state: paused;
-            filter: brightness(0.7) grayscale(0.3);
-            transition: filter 0.5s ease;
-        }
-        .playing-spin {
-            filter: brightness(1) grayscale(0);
-            transition: filter 0.5s ease;
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-up {
+        /* Floating Hint Style */
+        #toggle-hint {
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            background: #f5f5dc;
+            color: #8b0000;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            pointer-events: none;
+            z-index: 100;
             opacity: 0;
-            animation: fadeInUp 0.8s ease-out forwards;
+            transition: opacity 0.4s ease;
+        }
+        @media (min-width: 640px) { #toggle-hint { font-size: 11px; padding: 8px 14px; } }
+        #toggle-hint::before {
+            content: "";
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid #f5f5dc;
         }
 
-        /* Glassmorphism */
+        @keyframes pulse-subtle {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-4px); }
+        }
+        .animate-pulse-subtle { animation: pulse-subtle 2s ease-in-out infinite; }
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.05);
             box-shadow: 0 4px 20px rgba(0,0,0,0.3); 
-        }
-        .glass-nav {
-            background: rgba(15, 14, 19, 0.95);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            transition: transform 0.3s ease-in-out;
         }
         .glass-sticky {
             background: rgba(20, 19, 24, 0.98);
@@ -117,102 +146,65 @@
             padding-bottom: max(12px, env(safe-area-inset-bottom));
         }
 
-        /* Interaction */
-        button, a { touch-action: manipulation; }
-        .tap-target { 
-            min-height: 48px; 
-            min-width: 48px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
-
-        /* Transitions */
-        #sticky-player { 
-            transform: translateY(110%); 
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
-        }
+        #sticky-player { transform: translateY(110%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         #sticky-player.visible { transform: translateY(0); }
 
-        /* Lightbox */
+        .assam-pattern {
+            display: none;
+            position: absolute;
+            inset: 0;
+            opacity: 0.05;
+            background-image: url('https://www.transparenttextures.com/patterns/pinstriped-suit.png');
+            pointer-events: none;
+        }
+        body.mode-assam .assam-pattern { display: block; }
+        
+        .vinyl-spin { transition: transform 0.7s; }
+        .playing-spin { animation: spin-slow 8s linear infinite; }
+
         #lightbox { transition: opacity 0.3s ease; }
-        #lightbox.open { opacity: 1; pointer-events: auto; }
 
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        /* Volume Slider Styling */
+        .volume-slider-wrapper { position: relative; width: 80px; md:width: 100px; height: 32px; display: flex; align-items: center; }
+        .volume-range {
+            -webkit-appearance: none; appearance: none; width: 100%; height: 4px;
+            background: rgba(255, 255, 255, 0.1); border-radius: 2px; outline: none; cursor: pointer;
         }
-
-        /* --- Spotify-like Volume Slider --- */
-        .volume-control-group { display: none; }
-        @media (min-width: 768px) {
-            .volume-control-group { display: flex; }
-            .volume-slider-wrapper {
-                position: relative;
-                width: 100px;
-                height: 20px;
-                display: flex;
-                align-items: center;
-            }
-            .volume-range {
-                -webkit-appearance: none;
-                appearance: none;
-                width: 100%;
-                height: 4px;
-                background: rgba(255,255,255,0.2);
-                border-radius: 2px;
-                outline: none;
-                cursor: pointer;
-            }
-            .volume-range::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                width: 12px;
-                height: 12px;
-                border-radius: 50%;
-                background: #fff;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                opacity: 0;
-                transition: opacity 0.2s, transform 0.2s;
-                margin-top: -4px;
-            }
-            .volume-range::-moz-range-thumb {
-                width: 12px;
-                height: 12px;
-                border-radius: 50%;
-                background: #fff;
-                border: none;
-                opacity: 0;
-                transition: opacity 0.2s, transform 0.2s;
-            }
-            .volume-control-group:hover .volume-range::-webkit-slider-thumb { opacity: 1; }
-            .volume-control-group:hover .volume-range::-moz-range-thumb { opacity: 1; }
+        .volume-range::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 12px; height: 12px;
+            background: #fff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            opacity: 0; transition: opacity 0.1s ease, transform 0.1s ease;
         }
-
-        /* Language Toggle Style */
-        .lang-btn.active {
-            color: #cba172;
-            border-bottom: 2px solid #cba172;
+        .volume-range::-moz-range-thumb {
+            width: 12px; height: 12px; background: #fff; border-radius: 50%; border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5); opacity: 0;
         }
+        .volume-slider-wrapper:hover .volume-range::-webkit-slider-thumb { opacity: 1; }
+        .volume-slider-wrapper:hover .volume-range::-moz-range-thumb { opacity: 1; }
     </style>
 </head>
-<body class="bg-otter-dark text-gray-200 font-sans antialiased pb-32 md:pb-24 selection:bg-otter-accent selection:text-black">
+<body id="body" class="bg-otter-dark text-gray-200 font-sans antialiased pb-32 md:pb-24 selection:bg-otter-accent selection:text-black">
+    <div class="assam-pattern"></div>
 
+    <!-- Navbar -->
     <nav class="fixed top-0 w-full z-50 glass-nav" id="navbar">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
-            <a href="#" class="flex items-center gap-3 group z-20 shrink-0 p-1" aria-label="Home">
-                <div class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-otter-accent/40 group-hover:border-otter-accent transition-colors">
-                    <img src="https://i.postimg.cc/Hsfv2Lb4/logo.png" alt="" class="w-full h-full object-cover">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center gap-2">
+            <!-- Logo Section -->
+            <a href="#" class="flex items-center gap-2 sm:gap-3 group z-20 shrink-0" aria-label="Home">
+                <div class="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border border-otter-accent/40 group-hover:border-otter-accent transition-colors">
+                    <img id="nav-logo" src="https://i.postimg.cc/Hsfv2Lb4/logo.png" alt="" class="w-full h-full object-cover">
                 </div>
-                <span class="font-display font-bold text-lg sm:text-xl text-white group-hover:text-otter-accent transition-colors hidden xs:block">Otter Music</span>
+                <span id="nav-title" class="font-display font-bold text-base sm:text-xl text-white group-hover:text-otter-accent transition-colors hidden xs:block">Otter Music</span>
             </a>
             
-            <div class="flex items-center gap-4 sm:gap-8 text-sm font-medium tracking-wide overflow-x-auto no-scrollbar ml-auto pl-2">
-                <a href="#featured" class="nav-link hover:text-otter-accent transition-colors whitespace-nowrap py-2 px-1">Featured</a>
-                <a href="#discography" class="nav-link hover:text-otter-accent transition-colors whitespace-nowrap py-2 px-1">Discography</a>
-                <a href="#about" class="nav-link hover:text-otter-accent transition-colors whitespace-nowrap py-2 px-1">About</a>
-                <button onclick="UI.openProfile()" class="px-5 py-2 rounded-full border border-otter-accent/30 hover:bg-otter-accent/10 hover:border-otter-accent text-otter-accent transition-all whitespace-nowrap text-xs font-bold uppercase tracking-wider">
+            <div class="flex items-center gap-3 sm:gap-6 text-xs sm:text-sm font-medium tracking-wide overflow-x-auto no-scrollbar ml-auto pl-2">
+                <div class="relative flex items-center">
+                    <button id="assam-mode-btn" onclick="UI.toggleMode()">Through Assam</button>
+                    <div id="toggle-hint" class="animate-pulse-subtle">Assamese melodies here</div>
+                </div>
+                <a href="#featured" class="nav-link hover:text-otter-accent transition-colors whitespace-nowrap py-2">Featured</a>
+                <a href="#discography" class="nav-link hover:text-otter-accent transition-colors whitespace-nowrap py-2 hidden sm:block">Discography</a>
+                <button onclick="UI.openProfile()" class="px-3 sm:px-5 py-1.5 sm:py-2 rounded-full border border-otter-accent/30 hover:bg-otter-accent/10 hover:border-otter-accent text-otter-accent transition-all whitespace-nowrap text-[10px] sm:text-xs font-bold uppercase tracking-wider">
                     Profile
                 </button>
             </div>
@@ -220,16 +212,16 @@
     </nav>
 
     <!-- Lightbox -->
-    <div id="lightbox" class="fixed inset-0 z-[200] bg-black/95 opacity-0 pointer-events-none flex items-center justify-center p-4 backdrop-blur-sm">
+    <div id="lightbox" class="fixed inset-0 z-[999] bg-black/95 backdrop-blur-sm opacity-0 pointer-events-none flex items-center justify-center p-4">
         <button onclick="UI.closeLightbox()" class="absolute top-6 right-6 text-white/50 hover:text-white tap-target text-3xl transition-colors">
             <i class="fas fa-times"></i>
         </button>
-        <img id="lightbox-img" src="" alt="Full screen view" class="max-h-[90vh] max-w-full object-contain rounded-md shadow-2xl">
+        <img id="lightbox-img" src="" alt="Full screen view" class="max-h-[90vh] max-w-full object-contain rounded-lg shadow-2xl">
     </div>
 
     <!-- Email Modal -->
-    <div id="email-modal" class="fixed inset-0 z-[120] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-otter-card border border-white/10 rounded-2xl p-8 max-w-sm w-full text-center relative transform scale-95 transition-all duration-300" id="email-modal-content">
+    <div id="email-modal" class="fixed inset-0 z-[1200] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-otter-card border border-white/10 rounded-2xl p-6 sm:p-8 max-w-sm w-full text-center relative transform scale-95 transition-all duration-300" id="email-modal-content">
             <button onclick="UI.closeEmailModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white tap-target w-10 h-10 flex items-center justify-center">
                 <i class="fas fa-times"></i>
             </button>
@@ -246,75 +238,65 @@
 
     <!-- Profile Overlay -->
     <div id="profile-view" class="fixed inset-0 z-[100] bg-otter-dark text-white translate-x-full transition-transform duration-500 overflow-y-auto outline-none" role="dialog" aria-modal="true" tabindex="-1">
-        <button onclick="UI.closeProfile()" class="fixed top-6 right-6 z-50 w-12 h-12 rounded-full bg-white/5 hover:bg-otter-accent hover:text-black flex items-center justify-center transition-all border border-white/10 backdrop-blur-md tap-target">
-            <i class="fas fa-times text-xl"></i>
+        <button onclick="UI.closeProfile()" class="fixed top-6 right-6 z-50 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/5 hover:bg-otter-accent hover:text-black flex items-center justify-center transition-all border border-white/10 backdrop-blur-md tap-target">
+            <i class="fas fa-times text-lg sm:text-xl"></i>
         </button>
-        <div class="min-h-screen flex flex-col items-center justify-center p-6 relative">
-             <div class="max-w-3xl mx-auto relative z-10 text-center py-20">
-                <div class="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-otter-accent/20 mb-8 shadow-2xl">
-                    <img src="https://i.postimg.cc/sxm2926S/image-4-0.png" alt="Otter" class="w-full h-full object-cover">
+        <div class="min-h-screen flex flex-col items-center p-4 sm:p-6 relative">
+             <div class="max-w-3xl w-full mx-auto relative z-10 text-center py-16 sm:py-20">
+                <div class="w-24 h-24 sm:w-32 sm:h-32 mx-auto rounded-full overflow-hidden border-4 border-otter-accent/20 mb-6 sm:mb-8 shadow-2xl">
+                    <img id="profile-img" src="https://i.postimg.cc/sxm2926S/image-4-0.png" alt="Otter" class="w-full h-full object-cover">
                 </div>
-                <h2 class="font-display text-4xl md:text-5xl font-bold mb-2">Hreeshyat Talukdar</h2>
-                <h3 class="font-sans text-otter-accent text-xl tracking-widest uppercase mb-10">Stage Identity: Otter</h3>
-                <div class="space-y-8 text-lg md:text-xl text-gray-300 font-light leading-relaxed">
-                    <p class="glass-panel p-8 rounded-2xl border-l-4 border-otter-accent text-left">
-                        Hreeshyat Talukdar (Otter) is a 19-year-old independent artist from Assam, India. Blending modern pop textures with cinematic atmospheres.
-                    </p>
-                    <p class="text-left">
-                        Working with AI-powered tools like <span class="text-white font-medium">Suno AI</span> and <span class="text-white font-medium">ElevenLabs</span>.
+                <h2 id="profile-name" class="font-display text-3xl sm:text-5xl font-bold mb-2 text-white px-2">Hreeshyat Talukdar</h2>
+                <h3 id="profile-identity" class="font-sans text-otter-accent text-sm sm:text-xl tracking-widest uppercase mb-8 sm:mb-10">Stage Identity: Otter</h3>
+                <div class="space-y-6 sm:space-y-8 text-base sm:text-xl text-gray-300 font-light leading-relaxed px-2">
+                    <p id="profile-bio" class="glass-panel p-6 sm:p-8 rounded-2xl border-l-4 border-otter-accent text-left text-sm sm:text-base">
+                        Hreeshyat Talukdar (Otter) is an independent young music creator from Assam, India, exploring the intersection of culture, technology, and sound. Working with Suno AI and ElevenLabs
                     </p>
                 </div>
 
-                <!-- Gallery Grid -->
-                <div class="w-full mt-12 mb-8">
-                    <h4 class="text-left text-white font-display text-2xl font-bold mb-6 border-b border-white/10 pb-2">Gallery</h4>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/sxm2926S/image-4-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.02] transition-transform">
-                             <img src="https://i.postimg.cc/sxm2926S/image-4-0.png" class="w-full h-full object-cover">
+                <!-- Gallery Section -->
+                <section class="w-full mt-10 sm:mt-12">
+                    <h2 class="text-2xl sm:text-3xl font-bold mb-6 border-b border-white/10 pb-2 text-left text-white font-display">Gallery</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/sxm2926S/image-4-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.03] transition-transform">
+                            <img src="https://i.postimg.cc/sxm2926S/image-4-0.png" class="w-full h-full object-cover" loading="lazy" />
                         </button>
-                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/1X3SSrBy/image-5-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.02] transition-transform">
-                             <img src="https://i.postimg.cc/1X3SSrBy/image-5-0.png" class="w-full h-full object-cover">
+                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/1X3SSrBy/image-5-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.03] transition-transform">
+                            <img src="https://i.postimg.cc/1X3SSrBy/image-5-0.png" class="w-full h-full object-cover" loading="lazy" />
                         </button>
-                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/hPwnFx7Z/image-3-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.02] transition-transform">
-                             <img src="https://i.postimg.cc/hPwnFx7Z/image-3-0.png" class="w-full h-full object-cover">
+                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/hPwnFx7Z/image-3-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.03] transition-transform">
+                            <img src="https://i.postimg.cc/hPwnFx7Z/image-3-0.png" class="w-full h-full object-cover" loading="lazy" />
                         </button>
-                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/TwC8tW6z/image-2-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.02] transition-transform">
-                             <img src="https://i.postimg.cc/TwC8tW6z/image-2-0.png" class="w-full h-full object-cover">
+                        <button onclick="UI.openLightbox(this)" data-src="https://i.postimg.cc/TwC8tW6z/image-2-0.png" class="aspect-square rounded-xl overflow-hidden bg-white/5 hover:scale-[1.03] transition-transform">
+                            <img src="https://i.postimg.cc/TwC8tW6z/image-2-0.png" class="w-full h-full object-cover" loading="lazy" />
                         </button>
                     </div>
-                </div>
+                </section>
 
-                <!-- Profile Social Icons -->
-                <div class="mt-12 flex justify-center gap-6 flex-wrap">
-                    <a href="https://www.instagram.com/hrees_tal_official/" target="_blank" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all border border-white/10 tap-target">
-                        <i class="fab fa-instagram text-xl"></i>
-                    </a>
-                    <a href="https://open.spotify.com/artist/7s2q30BhMkSui7m3p8n03t" target="_blank" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#1DB954] transition-all border border-white/10 tap-target">
-                        <i class="fab fa-spotify text-xl"></i>
-                    </a>
-                    <a href="https://www.youtube.com/@ottermusicind" target="_blank" class="w-12 h-12 rounded-full bg-otter-accent text-otter-dark flex items-center justify-center hover:scale-105 transition-all font-bold shadow-lg shadow-otter-accent/20 tap-target">
-                        <i class="fab fa-youtube text-xl"></i>
-                    </a>
+                <div id="profile-socials" class="mt-10 sm:mt-12 flex justify-center gap-4 sm:gap-6 flex-wrap">
+                    <a href="https://www.instagram.com/hrees_tal_official/" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all border border-white/10 tap-target"><i class="fab fa-instagram text-lg sm:text-xl"></i></a>
+                    <a href="https://open.spotify.com/artist/7s2q30BhMkSui7m3p8n03t" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#1DB954] transition-all border border-white/10 tap-target"><i class="fab fa-spotify text-lg sm:text-xl"></i></a>
+                    <a id="profile-yt-link" href="https://www.youtube.com/@ottermusicind" target="_blank" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-otter-accent text-otter-dark flex items-center justify-center hover:scale-105 transition-all font-bold shadow-lg shadow-otter-accent/20 tap-target"><i class="fab fa-youtube text-lg sm:text-xl"></i></a>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Hero Section -->
-    <header class="relative min-h-[90dvh] md:min-h-screen flex items-center justify-center pt-20 overflow-hidden px-4">
-        <div class="absolute inset-0 bg-otter-dark">
-            <div class="absolute top-0 left-1/4 w-96 h-96 bg-otter-accent/10 rounded-full blur-[120px]"></div>
-            <div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-900/10 rounded-full blur-[120px]"></div>
+    <header class="relative min-h-[80dvh] md:min-h-screen flex items-center justify-center pt-20 overflow-hidden px-4">
+        <div class="absolute inset-0 bg-otter-dark transition-colors duration-500" id="hero-bg">
+            <div id="hero-blob-1" class="absolute top-0 left-1/4 w-64 h-64 md:w-96 md:h-96 bg-otter-accent/10 rounded-full blur-[80px] md:blur-[120px]"></div>
+            <div id="hero-blob-2" class="absolute bottom-0 right-1/4 w-80 h-80 md:w-[500px] md:h-[500px] bg-purple-900/10 rounded-full blur-[80px] md:blur-[120px]"></div>
         </div>
-        <div class="relative z-10 text-center max-w-4xl mx-auto" id="featured">
-            <h1 class="font-display text-4xl sm:text-5xl md:text-8xl font-bold text-white mb-8 leading-tight animate-fade-in-up">
+        <div class="relative z-10 text-center max-w-4xl mx-auto">
+            <h1 id="hero-title" class="font-display text-4xl sm:text-6xl md:text-8xl font-bold text-white mb-6 sm:mb-8 leading-tight animate-fade-in-up px-2">
                 Music for every <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-otter-accent to-white">moment</span>
             </h1>
-            <p class="text-base md:text-lg text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style="animation-delay: 0.2s;">
+            <p id="hero-desc" class="text-sm sm:text-base md:text-lg text-gray-300 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up px-4">
                 Redefining the auditory experience. Built for the deep listeners.
             </p>
             <div class="animate-fade-in-up" style="animation-delay: 0.4s;">
-                <a href="#discography" class="inline-block px-10 py-4 bg-otter-accent text-otter-dark font-bold rounded-full hover:bg-white hover:scale-105 transition-all shadow-lg shadow-otter-accent/20 tap-target">
+                <a href="#discography" class="inline-block px-8 sm:px-10 py-3 sm:py-4 bg-otter-accent text-otter-dark font-bold rounded-full hover:bg-white hover:scale-105 transition-all shadow-lg shadow-otter-accent/20 tap-target text-sm sm:text-base">
                     Listen Now
                 </a>
             </div>
@@ -324,219 +306,111 @@
     <!-- Discography -->
     <section id="discography" class="py-12 md:py-24 relative">
         <div class="max-w-6xl mx-auto px-4 md:px-6">
-            <h2 class="font-display text-3xl md:text-5xl font-bold mb-10 md:mb-16 text-center">
-                <span class="border-b-2 border-otter-accent pb-2">The Collection</span>
+            <h2 class="font-display text-3xl md:text-5xl font-bold mb-10 md:mb-16 text-center px-4">
+                <span id="discography-title" class="border-b-2 border-otter-accent pb-2 text-white">The Collection</span>
             </h2>
-            <div class="grid gap-4 md:gap-6" id="song-container"></div>
+            <div class="grid gap-4 md:gap-6 px-2" id="song-container"></div>
         </div>
     </section>
 
     <!-- Sticky Mini Player -->
-    <div id="sticky-player" class="fixed bottom-0 left-0 w-full glass-sticky z-[90] px-4 py-3 hidden">
-        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 md:gap-4">
-            <div class="flex items-center gap-3 w-1/3 md:w-1/4 min-w-[120px] overflow-hidden">
-                <img id="sticky-cover" src="" class="w-10 h-10 md:w-12 md:h-12 rounded-lg object-cover bg-gray-800 shrink-0">
+    <div id="sticky-player" class="fixed bottom-0 left-0 w-full glass-sticky z-[90] px-4 py-2 sm:py-3 hidden">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+            <!-- Song Meta -->
+            <div class="flex items-center gap-2 sm:gap-3 w-1/3 sm:w-1/4 min-w-[100px] overflow-hidden">
+                <img id="sticky-cover" src="" class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg object-cover bg-gray-800 shrink-0">
                 <div class="overflow-hidden">
-                    <h4 id="sticky-title" class="font-display font-bold text-white text-xs md:text-sm truncate">Select a song</h4>
-                    <p id="sticky-artist" class="text-[10px] md:text-xs text-otter-accent truncate">Otter</p>
+                    <h4 id="sticky-title" class="font-display font-bold text-white text-[10px] sm:text-sm truncate">Select a song</h4>
+                    <p id="sticky-artist" class="text-[9px] sm:text-xs text-otter-accent truncate">Otter</p>
                 </div>
             </div>
             
-            <div class="flex-grow max-w-xl flex flex-col items-center gap-1">
-                <div class="flex items-center gap-4 md:gap-6">
-                    <button onclick="AudioController.skip(-5)" class="text-gray-400 hover:text-white p-2"><i class="fas fa-backward"></i></button>
-                    <button id="sticky-play-btn" onclick="AudioController.togglePlay()" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white text-black flex items-center justify-center hover:bg-otter-accent transition-colors shadow-lg"><i class="fas fa-play ml-0.5"></i></button>
-                    <button onclick="AudioController.skip(5)" class="text-gray-400 hover:text-white p-2"><i class="fas fa-forward"></i></button>
+            <!-- Controls -->
+            <div class="flex-grow max-w-xl flex flex-col items-center gap-1 sm:gap-2">
+                <div class="flex items-center gap-3 sm:gap-6">
+                    <button onclick="AudioController.skip(-5)" class="text-gray-400 hover:text-white p-1 sm:p-2 transition-colors"><i class="fas fa-backward text-xs sm:text-base"></i></button>
+                    <button id="sticky-play-btn" onclick="AudioController.togglePlay()" class="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-white text-black flex items-center justify-center hover:bg-otter-accent transition-colors shadow-lg"><i class="fas fa-play ml-0.5 text-xs sm:text-base"></i></button>
+                    <button onclick="AudioController.skip(5)" class="text-gray-400 hover:text-white p-1 sm:p-2 transition-colors"><i class="fas fa-forward text-xs sm:text-base"></i></button>
                 </div>
-                <div class="hidden md:flex w-full items-center gap-2 text-[10px] text-gray-400 font-montserrat tabular-nums cursor-pointer" onclick="AudioController.seekFromSticky(event)">
+                <!-- PC Progress -->
+                <div class="hidden md:flex w-full items-center gap-3 text-[10px] text-gray-400 font-montserrat tabular-nums cursor-pointer" onclick="AudioController.seekFromSticky(event)">
                     <span id="sticky-time-current">0:00</span>
-                    <div class="relative flex-grow h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div id="sticky-progress-bar-desktop" class="absolute top-0 left-0 h-full bg-otter-accent w-0"></div>
+                    <div class="relative flex-grow h-1.5 bg-white/10 rounded-full overflow-hidden group">
+                        <div id="sticky-progress-bar-desktop" class="absolute top-0 left-0 h-full bg-otter-accent w-0 transition-all duration-100"></div>
                     </div>
                     <span id="sticky-time-total">0:00</span>
                 </div>
             </div>
 
-            <div class="w-1/3 md:w-1/4 flex justify-end items-center gap-2 text-[10px] text-gray-400 font-montserrat tabular-nums">
-                <div class="md:hidden" id="sticky-time-display-mobile">0:00</div>
-                <div class="volume-control-group items-center gap-2">
-                    <button onclick="AudioController.toggleMute()" class="w-6 flex items-center justify-center hover:text-white"><i id="volume-icon" class="fas fa-volume-up"></i></button>
+            <!-- Volume/Time Mobile -->
+            <div class="w-1/3 sm:w-1/4 flex justify-end items-center gap-3 text-[10px] font-montserrat tabular-nums">
+                <div class="md:hidden text-white font-bold" id="sticky-time-display-mobile">0:00</div>
+                <!-- PC Volume -->
+                <div class="hidden sm:flex volume-control-group items-center gap-3">
+                    <button onclick="AudioController.toggleMute()" class="w-5 flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                        <i id="volume-icon" class="fas fa-volume-up"></i>
+                    </button>
                     <div class="volume-slider-wrapper">
                         <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" class="volume-range" oninput="AudioController.setVolume(this.value)">
                     </div>
                 </div>
             </div>
             
-            <div class="md:hidden absolute top-0 left-0 w-full h-1 bg-white/5" onclick="AudioController.seekFromSticky(event)">
+            <!-- Mobile Absolute Progress (Top of player) -->
+            <div class="md:hidden absolute top-0 left-0 w-full h-0.5 bg-white/5" onclick="AudioController.seekFromSticky(event)">
                 <div id="sticky-progress-bar-mobile" class="h-full bg-otter-accent w-0"></div>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer id="about" class="bg-black/50 border-t border-white/5 pt-12 pb-24 md:pt-20 md:pb-10">
-        <div class="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
+    <footer id="about" class="bg-black/50 border-t border-white/5 pt-12 pb-24 md:pt-20 md:pb-10 px-4">
+        <div class="max-w-7xl mx-auto flex flex-col items-center text-center">
             <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-otter-accent/30 mb-6">
-                <img src="https://i.postimg.cc/Hsfv2Lb4/logo.png" alt="Logo" class="w-full h-full object-cover">
+                <img id="footer-logo" src="https://i.postimg.cc/Hsfv2Lb4/logo.png" alt="Logo" class="w-full h-full object-cover">
             </div>
-            <h3 class="font-display text-2xl font-bold text-white mb-4">Otter Music</h3>
-            <p class="text-gray-400 max-w-2xl mb-8 leading-relaxed font-light text-sm px-4">
+            <h3 id="footer-title" class="font-display text-2xl font-bold text-white mb-4">Otter Music</h3>
+            <p id="footer-desc" class="text-gray-400 max-w-2xl mb-8 leading-relaxed font-light text-xs sm:text-sm">
                 Otter Music is not about perfection — it’s about exploration, fun, and pushing creative boundaries.
             </p>
-            <div class="flex gap-6 mb-12">
-                <a href="https://www.instagram.com/hrees_tal_official/" target="_blank" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-otter-accent hover:text-black transition-all border border-white/10 tap-target">
+            
+            <div class="flex gap-4 sm:gap-6 mb-12">
+                <a href="https://www.instagram.com/hrees_tal_official/" target="_blank" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-otter-accent hover:text-black transition-all border border-white/10">
                     <i class="fab fa-instagram"></i>
                 </a>
-                <a href="https://www.youtube.com/@ottermusicind" target="_blank" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#FF0000] hover:text-white transition-all border border-white/10 tap-target">
+                <a id="footer-yt-link" href="https://www.youtube.com/@ottermusicind" target="_blank" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#FF0000] hover:text-white transition-all border border-white/10">
                     <i class="fab fa-youtube"></i>
                 </a>
-                <button onclick="UI.openEmailModal()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-otter-accent hover:text-black transition-all border border-white/10 tap-target">
+                <button onclick="UI.openEmailModal()" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-otter-accent hover:text-black transition-all border border-white/10">
                     <i class="fas fa-envelope"></i>
                 </button>
             </div>
-            <p class="text-gray-600 text-xs">&copy; 2026 Otter Music. All rights reserved.</p>
+
+            <p id="footer-copyright" class="text-gray-600 text-[10px] sm:text-xs">&copy; 2026 Otter Music. All rights reserved.</p>
         </div>
     </footer>
 
     <script>
-        const songs = [
-            {
-                id: 10,
-                title: "Kaamuki",
-                artist: "Otter",
-                cover: "https://i.postimg.cc/tTFxbPb4/Njnjfnejfne-Kamaki.jpg",
-                releaseDate: "Soon",
-                description: "A love song with cross auditory journey made in R&B style with a pop touch made with dreamy, youthful and intimate romance. Made in three different language : Malayalam (Original) , Hindi and English.",
-                previewUrl: "https://image2url.com/r2/default/audio/1770020952717-71b0476a-abe5-440e-beb3-c790ea24e37d.mp3",
-                duration: "0:49",
-                variants: [
-                    { lang: "Malayalam (Original)", title: "Kaamuki", url: "https://image2url.com/r2/default/audio/1770020952717-71b0476a-abe5-440e-beb3-c790ea24e37d.mp3", duration: "0:49" },
-                    { lang: "Hindi", title: "Kaamuki (Hindi)", url: "https://image2url.com/r2/default/audio/1770020997990-bf65e36d-1a0f-429c-a142-6732a0051203.mp3", duration: "0:49" },
-                    { lang: "English", title: "Girl", url: "https://image2url.com/r2/default/audio/1770021041229-084b81b6-a2ae-4973-94dd-654a8ae67501.mp3", duration: "0:39" }
-                ],
-                activeVariant: 0
-            },
-            {
-                id: 0,
-                title: "Moonlight Between Us",
-                artist: "Otter",
-                cover: "https://i.postimg.cc/8cdmDLyJ/ab67616d00001e02ea64b5c4078aaf996009381a.jpg",
-                releaseDate: "Dec 2025",
-                description: "Love music blended with modern elements while maintaining classic style. A journey through the phases of connection and distance.",
-                spotifyUrl: "https://open.spotify.com/track/0XUNIjn6fKicoLJXbN4eYZ?si=chU8tFTMRYChXdXtJsJXLw",
-                youtubeUrl: "https://youtu.be/ljycK6_2Fhk",
-                previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Moonlight%20Between%20US%20%5B30%20s%20Preview%5D.mp3",
-                duration: "0:27"
-            },
-            {
-                id: 9,
-                title: "Tu Muskura",
-                artist: "Otter",
-                cover: "https://i.postimg.cc/52q1bXLj/fallii.jpg",
-                releaseDate: "Soon",
-                description: "A Hindi romantic ballad, modern Bollywood love song, with soft expressive male vocal, slightly husky, emotional but restrained with close-mic feel.",
-                spotifyUrl: "",
-                youtubeUrl: "https://youtu.be/nO9muM0QBrM",
-                previewUrl: "https://image2url.com/r2/default/audio/1769743761940-43180695-823d-40c7-9d11-5b3c39168c7f.mp3",
-                duration: "0:42"
-            },
-            {
-                id: 8,
-                title: "King's Fortress",
-                artist: "Otter",
-                cover: "https://i.postimg.cc/QtDRQfHM/King.jpg",
-                releaseDate: "Soon",
-                description: "A high-energy cinematic rap anthem, modern hip-hop and pop fusion, aggressive male vocals, with, global sound and Indian English",
-                spotifyUrl: "",
-                youtubeUrl: "https://youtu.be/YF2zSsU5_F0",
-                previewUrl: "https://image2url.com/r2/default/audio/1769144084322-f263c263-4ff3-4013-8c62-80ec276df326.mp3",
-                duration: "0:41"
-            },
-            {
-                id: 7,
-                title: "Shikayat",
-                artist: "Otter",
-                cover: "https://i.postimg.cc/02x8kfkd/11929929jjjf.jpg",
-                releaseDate: "Soon",
-                description: "A soft heart toughing pop with soft male vocals song to depict a love story beautifully and in a smooth free flow way.",
-                spotifyUrl: "",
-                youtubeUrl: "https://youtu.be/qdxcrrhiQ4s",
-                previewUrl: "https://image2url.com/r2/default/audio/1768715338935-5ead2d86-e841-4f8c-afe4-ca8e36ffb39e.mp3",
-                duration: "0:40"
-            },
-            {
-                id: 6,
-                title: "2025",
-                artist: "Otter",
-                cover: "https://i.postimg.cc/PqCvCNS8/2026.jpg",
-                releaseDate: "Jan 2026",
-                description: "This is afro beat style, pop music, with soft male vocals and energetic vibe which about the world in the whole 2025, also a 2025 wrapped of the world reality.",
-                spotifyUrl: "",
-                youtubeUrl: "https://youtu.be/8pm76MyC3-o",
-                previewUrl: "https://image2url.com/r2/default/audio/1768464567040-61e1fa10-9e4a-4249-a0a6-bce6d9e43eb5.mp3",
-                duration: "0:43"
-            },
-            {
-                id: 5,
-                title: "One side",
-                artist: "Otter",
-                cover: "https://i.postimg.cc/dQWCNtRq/11112.jpg",
-                releaseDate: "Soon",
-                description: "A one sided love song based pop style with modern edm romanticizing purity of love added with male vocals givng a heart touching vibe",
-                spotifyUrl: "",
-                youtubeUrl: "https://youtu.be/Gd6PXbPJX0E",
-                previewUrl: "https://image2url.com/r2/default/audio/1768455113011-3516a700-503c-4f36-8e46-fa6ff3a7d605.mp3",
-                duration: "0:33"
-            },
-            {
-                id: 1,
-                title: "FireFlies",
-                artist: "Otter",
-                cover: "https://i.postimg.cc/RFXT8DB7/Gemini-Generated-Image-bbxwwabbxwwabbxw-Photoroom.png",
-                releaseDate: "Soon",
-                description: "A Hindi, soft, natural edm-infused hip hop with electro synths and mellow beats.",
-                spotifyUrl: "",
-                youtubeUrl: "https://youtu.be/WCX03DisJmc",
-                previewUrl: "https://image2url.com/r2/default/audio/1768207786835-40916349-d7c3-40bd-9e11-42940d542f8a.mp3",
-                duration: "0:29"
-            },
-            {
-                id: 2,
-                title: "Keher",
-                artist: "Otter",
-                cover: "https://i.postimg.cc/yWC48FPK/Untitled-design.jpg",
-                releaseDate: "Soon",
-                description: "Hindi hip-hop/EDM banger at 100 bpm with heavy 808s, electro, big-room hook.",
-                spotifyUrl: "https://open.spotify.com/track/2phVrVn9mWbpK8nL4lC0WR?si=2a1999e355ff48cf",
-                youtubeUrl: "https://youtu.be/FGgdNonCfM8",
-                previewUrl: "https://image2url.com/r2/default/audio/1768207846145-873484b4-0150-4cd4-bbdd-6dd2fcab5a7a.mp3",
-                duration: "0:28"
-            },
-            {
-                id: 3,
-                title: "Titli",
-                artist: "Otter",
-                cover: "https://i.postimg.cc/vHH40B2m/Untitled-design.jpg",
-                releaseDate: "Soon",
-                description: "A moody Hindi sad-love pop song blending gentle EDM pads, soft hip hop drums.",
-                spotifyUrl: "",
-                youtubeUrl: "https://youtu.be/cBmeVKb3Hzo",
-                previewUrl: "https://image2url.com/r2/default/audio/1768207877115-8538c04a-c286-4900-8fa7-98fc39e0dcf5.mp3",
-                duration: "0:47"
-            },
-            {
-                id: 4,
-                title: "Tum Hi",
-                artist: "Otter",
-                cover: "https://i.postimg.cc/KY1VmzPK/Untitled-design-222.jpg",
-                releaseDate: "Soon",
-                description: "A soft love song with male lead vocals, romantic , slow guitar, bass, metaphor, sad, heart wrenching and heart touching.",
-                spotifyUrl: "",
-                youtubeUrl: "https://youtu.be/AhDdYhLde1w",
-                previewUrl: "https://image2url.com/r2/default/audio/1768207896259-efaed209-7e51-40ed-9d59-6c964abce5da.mp3",
-                duration: "0:45"
-            }
+        const songsGlobal = [
+            { id: 0, title: "Moonlight Between Us", artist: "Otter", cover: "https://i.postimg.cc/8cdmDLyJ/ab67616d00001e02ea64b5c4078aaf996009381a.jpg", releaseDate: "Dec 2025", description: "Love music blended with modern elements while maintaining classic style.", previewUrl: "https://raw.githubusercontent.com/slashmikey/audio/main/Moonlight%20Between%20US%20%5B30%20s%20Preview%5D.mp3", duration: "0:27" },
+            { id: 10, title: "Kaamuki", artist: "Otter", cover: "https://i.postimg.cc/tTFxbPb4/Njnjfnejfne-Kamaki.jpg", releaseDate: "Soon", description: "A love song with cross auditory journey made in R&B style with dreamy youthfulness.", previewUrl: "https://image2url.com/r2/default/audio/1770020952717-71b0476a-abe5-440e-beb3-c790ea24e37d.mp3", duration: "0:49", variants: [{ lang: "Malayalam", title: "Kaamuki", url: "https://image2url.com/r2/default/audio/1770020952717-71b0476a-abe5-440e-beb3-c790ea24e37d.mp3", duration: "0:49" }, { lang: "Hindi", title: "Kaamuki (Hindi)", url: "https://image2url.com/r2/default/audio/1770020997990-bf65e36d-1a0f-429c-a142-6732a0051203.mp3", duration: "0:49" }, { lang: "English", title: "Girl", url: "https://image2url.com/r2/default/audio/1770021041229-084b81b6-a2ae-4973-94dd-654a8ae67501.mp3", duration: "0:39" }], activeVariant: 0 },
+            { id: 9, title: "Tu Muskura", artist: "Otter", cover: "https://i.postimg.cc/52q1bXLj/fallii.jpg", releaseDate: "Soon", description: "A Hindi romantic ballad with expressive male vocals.", previewUrl: "https://image2url.com/r2/default/audio/1769743761940-43180695-823d-40c7-9d11-5b3c39168c7f.mp3", duration: "0:42", youtubeUrl: "https://youtu.be/nO9muM0QBrM" },
+            { id: 8, title: "King's Fortress", artist: "Otter", cover: "https://i.postimg.cc/QtDRQfHM/King.jpg", releaseDate: "Soon", description: "High-energy cinematic rap anthem fusion.", previewUrl: "https://image2url.com/r2/default/audio/1769144084322-f263c263-4ff3-4013-8c62-80ec276df326.mp3", duration: "0:41", youtubeUrl: "https://youtu.be/YF2zSsU5_F0" },
+            { id: 7, title: "Shikayat", artist: "Otter", cover: "https://i.postimg.cc/02x8kfkd/11929929jjjf.jpg", releaseDate: "Soon", description: "Soft heart-touching pop love story.", previewUrl: "https://image2url.com/r2/default/audio/1768715338935-5ead2d86-e841-4f8c-afe4-ca8e36ffb39e.mp3", duration: "0:40", youtubeUrl: "https://youtu.be/qdxcrrhiQ4s" },
+            { id: 6, title: "2025", artist: "Otter", cover: "https://i.postimg.cc/PqCvCNS8/2026.jpg", releaseDate: "Jan 2026", description: "Afro-beat 2025 wrapped of world reality.", youtubeUrl: "https://youtu.be/8pm76MyC3-o", previewUrl: "https://image2url.com/r2/default/audio/1768464567040-61e1fa10-9e4a-4249-a0a6-bce6d9e43eb5.mp3", duration: "0:43" },
+            { id: 5, title: "One side", artist: "Otter", cover: "https://i.postimg.cc/dQWCNtRq/11112.jpg", releaseDate: "Soon", description: "A one sided love song based pop style with modern edm.", youtubeUrl: "https://youtu.be/Gd6PXbPJX0E", previewUrl: "https://image2url.com/r2/default/audio/1768455113011-3516a700-503c-4f36-8e46-fa6ff3a7d605.mp3", duration: "0:33" },
+            { id: 1, title: "FireFlies", artist: "Otter", cover: "https://i.postimg.cc/RFXT8DB7/Gemini-Generated-Image-bbxwwabbxwwabbxw-Photoroom.png", releaseDate: "Soon", description: "Hindi soft natural EDM-infused hip hop.", youtubeUrl: "https://youtu.be/WCX03DisJmc", previewUrl: "https://image2url.com/r2/default/audio/1768207786835-40916349-d7c3-40bd-9e11-42940d542f8a.mp3", duration: "0:29" },
+            { id: 2, title: "Keher", artist: "Otter", cover: "https://i.postimg.cc/yWC48FPK/Untitled-design.jpg", releaseDate: "Soon", description: "Hindi hip-hop/EDM banger hook.", spotifyUrl: "https://open.spotify.com/track/2phVrVn9mWbpK8nL4lC0WR?si=2a1999e355ff48cf", youtubeUrl: "https://youtu.be/FGgdNonCfM8", previewUrl: "https://image2url.com/r2/default/audio/1768207846145-873484b4-0150-4cd4-bbdd-6dd2fcab5a7a.mp3", duration: "0:28" },
+            { id: 3, title: "Titli", artist: "Otter", cover: "https://i.postimg.cc/vHH40B2m/Untitled-design.jpg", releaseDate: "Soon", description: "Moody Hindi sad-love pop song.", youtubeUrl: "https://youtu.be/cBmeVKb3Hzo", previewUrl: "https://image2url.com/r2/default/audio/1768207877115-8538c04a-c286-4900-8fa7-98fc39e0dcf5.mp3", duration: "0:47" },
+            { id: 4, title: "Tum Hi", artist: "Otter", cover: "https://i.postimg.cc/KY1VmzPK/Untitled-design-222.jpg", releaseDate: "Soon", description: "Soft love song with slow guitar and heart-touching.", youtubeUrl: "https://youtu.be/AhDdYhLde1w", previewUrl: "https://image2url.com/r2/default/audio/1768207896259-efaed209-7e51-40ed-9d59-6c964abce5da.mp3", duration: "0:45" }
         ];
+
+        const songsAssam = [
+            { id: 101, title: "Bihu Melodies", artist: "Otter", cover: "https://i.postimg.cc/85pmvdtg/logo-yt-(Assam).png", releaseDate: "Jan 2026", description: "Traditional Assamese folk instruments with a modern twist.", previewUrl: "", duration: "2:45" },
+            { id: 102, title: "Luitur Parore", artist: "Otter", cover: "https://i.postimg.cc/85pmvdtg/logo-yt-(Assam).png", releaseDate: "Soon", description: "Soulful vocals celebrating the Brahmaputra valley.", previewUrl: "", duration: "3:12" }
+        ];
+
+        let currentMode = 'global';
 
         const AudioController = {
             audio: new Audio(),
@@ -545,34 +419,16 @@
 
             init() {
                 this.audio.preload = "auto";
-                this.setupAudioListeners();
-                this.setupKeyboardShortcuts();
-                this.updateVolumeUI();
                 this.audio.volume = this.volume;
+                this.setupAudioListeners();
+                this.updateVolumeUI();
             },
 
             setupAudioListeners() {
-                this.audio.addEventListener('timeupdate', () => {
-                    if (this.activeId !== null) {
-                        this.updateProgress(this.audio.currentTime, this.audio.duration);
-                    }
-                });
-
-                this.audio.addEventListener('ended', () => {
-                    this.updateUI(this.activeId, false);
-                    this.audio.currentTime = 0;
-                    this.updateProgress(0, 0);
-                });
-                
-                this.audio.addEventListener('play', () => {
-                     this.updateUI(this.activeId, true);
-                     this.showSticky(this.activeId);
-                });
-
-                this.audio.addEventListener('pause', () => {
-                     this.updateUI(this.activeId, false);
-                });
-
+                this.audio.addEventListener('timeupdate', () => { if (this.activeId !== null) this.updateProgress(this.audio.currentTime, this.audio.duration); });
+                this.audio.addEventListener('ended', () => { this.updateUI(this.activeId, false); this.audio.currentTime = 0; });
+                this.audio.addEventListener('play', () => { this.updateUI(this.activeId, true); this.showSticky(this.activeId); });
+                this.audio.addEventListener('pause', () => { this.updateUI(this.activeId, false); });
                 this.audio.addEventListener('loadedmetadata', () => {
                     if (this.activeId !== null) {
                         const durEl = document.getElementById(`time-dur-${this.activeId}`);
@@ -584,343 +440,211 @@
             },
 
             async toggle(id) {
+                const songs = currentMode === 'global' ? songsGlobal : songsAssam;
                 const song = songs.find(s => s.id === id);
-                if (!song) return;
-
+                if (!song || !song.previewUrl) return;
                 if (this.activeId === id) {
-                    if (this.audio.paused) {
-                        this.audio.play().catch(e => console.error(e));
-                    } else {
-                        this.audio.pause();
-                    }
+                    if (this.audio.paused) this.audio.play(); else this.audio.pause();
                 } else {
                     this.activeId = id;
                     document.querySelectorAll('.play-btn').forEach(b => b.innerHTML = '<i class="fas fa-play ml-0.5"></i>');
                     this.audio.src = song.previewUrl;
                     this.audio.load();
-                    this.audio.play().catch(e => {
-                        console.error(e);
-                        this.updateUI(id, false);
-                    });
-                    this.showSticky(id);
+                    this.audio.play().catch(e => this.updateUI(id, false));
                 }
             },
 
-            togglePlay() {
-                if (this.activeId !== null) {
-                    if (this.audio.paused) this.audio.play();
-                    else this.audio.pause();
-                }
-            },
-
-            seek(e, id) {
-                e.stopPropagation();
-                if (this.activeId !== id) {
-                    this.toggle(id);
-                    setTimeout(() => this.seekLogic(e), 150);
-                } else {
-                    this.seekLogic(e);
-                }
-            },
-
-            seekLogic(e) {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const pct = (e.clientX - rect.left) / rect.width;
-                if (this.audio.duration) this.audio.currentTime = pct * this.audio.duration;
-            },
-
-            seekFromSticky(e) {
-                if (this.activeId !== null) {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const pct = (e.clientX - rect.left) / rect.width;
-                    if (this.audio.duration) this.audio.currentTime = pct * this.audio.duration;
-                }
-            },
-
-            skip(sec) { if (this.activeId !== null) this.audio.currentTime += sec; },
-
-            setVolume(val) {
-                this.volume = val;
-                this.audio.volume = val;
-                this.updateVolumeUI();
-            },
-
-            toggleMute() {
-                const newVol = this.volume > 0 ? 0 : 0.5;
-                this.setVolume(newVol);
-            },
-
-            updateUI(id, isPlaying) {
-                const btn = document.getElementById(`btn-${id}`);
-                const stickyBtn = document.getElementById('sticky-play-btn');
-                const vinyl = document.getElementById(`vinyl-${id}`);
-
-                document.querySelectorAll('.vinyl-spin').forEach(v => {
-                    if(v.id !== `vinyl-${id}`) {
-                        v.classList.remove('playing-spin', 'animate-spin-slow'); 
-                        v.classList.add('paused-spin');
-                    }
-                });
-
-                if(isPlaying) {
-                    if(btn) btn.innerHTML = '<i class="fas fa-pause"></i>';
-                    if(stickyBtn) stickyBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                    if(vinyl) {
-                        vinyl.classList.remove('paused-spin');
-                        vinyl.classList.add('playing-spin', 'animate-spin-slow');
-                    }
-                } else {
-                    if(btn) btn.innerHTML = '<i class="fas fa-play ml-0.5"></i>';
-                    if(stickyBtn) stickyBtn.innerHTML = '<i class="fas fa-play ml-0.5"></i>';
-                    if(vinyl) {
-                        vinyl.classList.remove('playing-spin', 'animate-spin-slow');
-                        vinyl.classList.add('paused-spin');
-                    }
-                }
-            },
-
-            formatTime(t) {
-                if(isNaN(t)) return "0:00";
-                const m = Math.floor(t/60);
-                const s = Math.floor(t%60);
-                return `${m}:${s<10?'0':''}${s}`;
-            },
-
+            togglePlay() { if (this.activeId !== null) { if (this.audio.paused) this.audio.play(); else this.audio.pause(); } },
+            formatTime(t) { if(isNaN(t)) return "0:00"; const m = Math.floor(t/60); const s = Math.floor(t%60); return `${m}:${s<10?'0':''}${s}`; },
             updateProgress(time, duration) {
                 const pct = duration > 0 ? (time / duration) * 100 : 0;
                 const dBar = document.getElementById('sticky-progress-bar-desktop');
                 const mBar = document.getElementById('sticky-progress-bar-mobile');
-                const dTimeC = document.getElementById('sticky-time-current');
-                
+                const tCurSticky = document.getElementById('sticky-time-current');
+                const tCurMobile = document.getElementById('sticky-time-display-mobile');
                 if(dBar) dBar.style.width = `${pct}%`;
                 if(mBar) mBar.style.width = `${pct}%`;
-                if(dTimeC) dTimeC.innerText = this.formatTime(time);
-                document.getElementById('sticky-time-display-mobile').innerText = this.formatTime(time);
-
+                if(tCurSticky) tCurSticky.innerText = this.formatTime(time);
+                if(tCurMobile) tCurMobile.innerText = this.formatTime(time);
                 if (this.activeId !== null) {
                     const prog = document.getElementById(`progress-${this.activeId}`);
-                    const thumb = document.getElementById(`thumb-${this.activeId}`);
-                    const tCur = document.getElementById(`time-cur-${this.activeId}`);
+                    const tCurCard = document.getElementById(`time-cur-${this.activeId}`);
                     if(prog) prog.style.width = `${pct}%`;
-                    if(thumb) thumb.style.left = `${pct}%`;
-                    if(tCur) tCur.innerText = this.formatTime(time);
+                    if(tCurCard) tCurCard.innerText = this.formatTime(time);
                 }
             },
-
+            setVolume(val) { this.volume = val; this.audio.volume = val; this.updateVolumeUI(); },
             updateVolumeUI() {
                 const s = document.getElementById('volume-slider');
-                if(s) {
-                    s.value = this.volume;
-                    const p = this.volume * 100;
-                    s.style.background = `linear-gradient(to right, #cba172 ${p}%, rgba(255,255,255,0.2) ${p}%)`;
-                }
                 const icon = document.getElementById('volume-icon');
-                if(icon) icon.className = this.volume === 0 ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+                if (s) {
+                    const pct = this.volume * 100;
+                    const color = currentMode === 'assam' ? '#8b0000' : '#cba172';
+                    s.style.background = `linear-gradient(to right, ${color} ${pct}%, rgba(255,255,255,0.1) ${pct}%)`;
+                    s.value = this.volume;
+                }
+                if (icon) {
+                    if (this.volume == 0) icon.className = "fas fa-volume-mute";
+                    else if (this.volume < 0.5) icon.className = "fas fa-volume-down";
+                    else icon.className = "fas fa-volume-up";
+                }
             },
-
+            toggleMute() { if (this.audio.volume > 0) { this.lastVol = this.audio.volume; this.setVolume(0); } else { this.setVolume(this.lastVol || 0.5); } },
+            updateUI(id, isPlaying) {
+                const btn = document.getElementById(`btn-${id}`);
+                const stickyBtn = document.getElementById('sticky-play-btn');
+                const vinyl = document.getElementById(`vinyl-${id}`);
+                if(isPlaying) {
+                    if(btn) btn.innerHTML = '<i class="fas fa-pause"></i>';
+                    if(stickyBtn) stickyBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    if(vinyl) { vinyl.classList.remove('paused-spin'); vinyl.classList.add('playing-spin'); }
+                } else {
+                    if(btn) btn.innerHTML = '<i class="fas fa-play ml-0.5"></i>';
+                    if(stickyBtn) stickyBtn.innerHTML = '<i class="fas fa-play ml-0.5"></i>';
+                    if(vinyl) { vinyl.classList.remove('playing-spin'); vinyl.classList.add('paused-spin'); }
+                }
+            },
             showSticky(id) {
+                const songs = currentMode === 'global' ? songsGlobal : songsAssam;
                 const p = document.getElementById('sticky-player');
                 const s = songs.find(x => x.id === id);
                 if(s) {
                     document.getElementById('sticky-title').innerText = s.title;
                     document.getElementById('sticky-artist').innerText = s.artist;
                     document.getElementById('sticky-cover').src = s.cover;
-                    p.classList.remove('hidden');
-                    setTimeout(() => p.classList.add('visible'), 10);
+                    p.classList.remove('hidden'); setTimeout(() => p.classList.add('visible'), 10);
                 }
             },
-
-            setupKeyboardShortcuts() {
-                document.addEventListener('keydown', (e) => {
-                    if (e.code === 'Space') { e.preventDefault(); this.togglePlay(); }
-                });
-            }
+            skip(sec) { if (this.activeId !== null) this.audio.currentTime += sec; }
         };
 
         const UI = {
             init() {
                 this.renderSongs();
-                this.setupNav();
+                this.handleFirstVisitHint();
             },
-
+            handleFirstVisitHint() {
+                const hint = document.getElementById('toggle-hint');
+                if (!sessionStorage.getItem('hintShown')) { setTimeout(() => { hint.style.opacity = '1'; }, 1500); }
+            },
+            toggleMode() {
+                const hint = document.getElementById('toggle-hint');
+                hint.style.opacity = '0';
+                sessionStorage.setItem('hintShown', 'true');
+                currentMode = currentMode === 'global' ? 'assam' : 'global';
+                const body = document.getElementById('body');
+                const logo = document.getElementById('nav-logo');
+                const title = document.getElementById('nav-title');
+                const btn = document.getElementById('assam-mode-btn');
+                if (currentMode === 'assam') {
+                    body.classList.add('mode-assam'); logo.src = "https://i.postimg.cc/85pmvdtg/logo-yt-(Assam).png";
+                    title.innerText = "Otter Music Assam"; btn.innerText = "Original Web"; this.updateView('assam');
+                } else {
+                    body.classList.remove('mode-assam'); logo.src = "https://i.postimg.cc/Hsfv2Lb4/logo.png";
+                    title.innerText = "Otter Music"; btn.innerText = "Through Assam"; this.updateView('global');
+                }
+                AudioController.audio.pause(); AudioController.updateVolumeUI(); 
+                document.getElementById('sticky-player').classList.add('hidden');
+                this.renderSongs();
+            },
+            updateView(mode) {
+                const hTitle = document.getElementById('hero-title');
+                const hDesc = document.getElementById('hero-desc');
+                const dTitle = document.getElementById('discography-title');
+                const fTitle = document.getElementById('footer-title');
+                const fLogo = document.getElementById('footer-logo');
+                const fCopy = document.getElementById('footer-copyright');
+                const pImg = document.getElementById('profile-img');
+                const pBio = document.getElementById('profile-bio');
+                const pYtLink = document.getElementById('profile-yt-link');
+                const fYtLink = document.getElementById('footer-yt-link');
+                if (mode === 'assam') {
+                    hTitle.innerHTML = "Culture in every <br/><span class='text-transparent bg-clip-text bg-gradient-to-r from-assam-red to-assam-cream'>melody</span>";
+                    hDesc.innerText = "এইটো কেৱল এটা music website নহয় — ই এটা Assamese sound identity। যদি আপুনি ঢোলৰ beat-ত vibe কৰি, নতুন sound-ত explore কৰিব ভাল পায়, তেন্তে আপুনি আমাৰ মানুহ।";
+                    dTitle.innerText = "Assamese Collection"; fTitle.innerText = "Otter Music Assam";
+                    fLogo.src = "https://i.postimg.cc/85pmvdtg/logo-yt-(Assam).png"; fCopy.innerText = "© 2026 Otter Music Assam. All rights reserved.";
+                    pImg.src = "https://i.postimg.cc/sfqQ592G/image-4-0.png";
+                    pBio.innerText = "Hreeshyat Talukdar (Otter) is an independent young music creator from Assam, India, exploring the intersection of culture, technology, and sound. Through Otter Music Assam, he blends Assamese roots with modern, AI-powered experimentation like Suno AI and Eleven Labs to create music driven by vibe, curiosity, and creative freedom.";
+                    pYtLink.href = "https://youtube.com/@ottermusicassam2026?si=11uNAqzQ6fO6HihR"; fYtLink.href = "https://youtube.com/@ottermusicassam2026?si=11uNAqzQ6fO6HihR";
+                } else {
+                    hTitle.innerHTML = "Music for every <br/><span class='text-transparent bg-clip-text bg-gradient-to-r from-otter-accent to-white'>moment</span>";
+                    hDesc.innerText = "Redefining the auditory experience. Built for the deep listeners.";
+                    dTitle.innerText = "The Collection"; fTitle.innerText = "Otter Music";
+                    fLogo.src = "https://i.postimg.cc/Hsfv2Lb4/logo.png"; fCopy.innerText = "© 2026 Otter Music. All rights reserved.";
+                    pImg.src = "https://i.postimg.cc/sxm2926S/image-4-0.png";
+                    pBio.innerText = "Hreeshyat Talukdar (Otter) is an independent young music creator from Assam, India, exploring the intersection of culture, technology, and sound. Working with Suno AI and ElevenLabs";
+                    pYtLink.href = "https://www.youtube.com/@ottermusicind"; fYtLink.href = "https://www.youtube.com/@ottermusicind";
+                }
+            },
             renderSongs() {
+                const songs = currentMode === 'global' ? songsGlobal : songsAssam;
                 const c = document.getElementById('song-container');
                 c.innerHTML = songs.map((s) => `
-                    <div id="song-card-${s.id}" class="glass-panel rounded-xl md:rounded-2xl p-4 md:p-8 flex gap-4 md:gap-8 items-center md:items-start group transition-colors relative overflow-hidden card-fade-item">
-                        <div class="relative shrink-0 w-20 h-20 md:w-40 md:h-40">
-                            <div id="vinyl-${s.id}" class="vinyl-spin w-full h-full rounded-lg md:rounded-full overflow-hidden shadow-xl relative z-10 transition-transform duration-700">
-                                <div class="absolute inset-0 bg-black"></div>
-                                <img src="${s.cover}" class="w-full h-full object-cover opacity-80" loading="lazy">
-                                <div class="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-otter-card rounded-full border-2 border-otter-accent/50 z-20"></div>
+                    <div class="glass-panel rounded-xl p-4 sm:p-6 md:p-8 flex flex-col sm:flex-row gap-4 sm:gap-8 items-center sm:items-start group overflow-hidden">
+                        <div class="shrink-0 w-24 h-24 sm:w-32 md:w-40 sm:h-32 md:h-40 relative">
+                            <div id="vinyl-${s.id}" class="vinyl-spin w-full h-full rounded-lg overflow-hidden shadow-xl">
+                                <img src="${s.cover}" class="w-full h-full object-cover">
                             </div>
                         </div>
-
-                        <div class="flex-grow min-w-0 z-10 flex flex-col justify-center">
-                            <div class="flex justify-between items-start mb-2">
+                        <div class="flex-grow min-w-0 w-full">
+                            <div class="flex flex-col xs:flex-row justify-between items-start gap-2 mb-2">
                                 <div>
                                     <h3 id="title-${s.id}" class="font-display font-bold text-lg md:text-3xl text-white truncate">${s.title}</h3>
                                     <p class="text-xs md:text-lg text-otter-accent font-medium">${s.artist}</p>
                                 </div>
-                                <div class="hidden md:flex gap-2 shrink-0">
-                                    ${s.spotifyUrl ? `<a href="${s.spotifyUrl}" target="_blank" class="text-white/60 hover:text-[#1DB954] p-2 transition-colors"><i class="fab fa-spotify text-2xl"></i></a>` : ''}
-                                    ${s.youtubeUrl ? `<a href="${s.youtubeUrl}" target="_blank" class="text-white/60 hover:text-[#FF0000] p-2 transition-colors"><i class="fab fa-youtube text-2xl"></i></a>` : ''}
+                                <div class="flex gap-2 shrink-0">
+                                    ${s.spotifyUrl ? `<a href="${s.spotifyUrl}" target="_blank" class="text-white/60 hover:text-[#1DB954] p-2 transition-colors"><i class="fab fa-spotify text-lg sm:text-2xl"></i></a>` : ''}
+                                    ${s.youtubeUrl ? `<a href="${s.youtubeUrl}" target="_blank" class="text-white/60 hover:text-[#FF0000] p-2 transition-colors"><i class="fab fa-youtube text-lg sm:text-2xl"></i></a>` : ''}
                                 </div>
                             </div>
-
-                            <div class="hidden md:block mb-6 max-w-2xl">
-                                <p class="text-gray-500 text-sm leading-relaxed">${s.description}</p>
-                            </div>
-
-                            <!-- Mobile Socials -->
-                            <div class="flex md:hidden gap-3 mb-2 text-gray-500 text-xs">
-                                ${s.spotifyUrl ? `<a href="${s.spotifyUrl}" target="_blank" class="hover:text-[#1DB954]"><i class="fab fa-spotify"></i> Spotify</a>` : ''}
-                                ${s.youtubeUrl ? `<a href="${s.youtubeUrl}" target="_blank" class="hover:text-[#FF0000]"><i class="fab fa-youtube"></i> YouTube</a>` : ''}
-                            </div>
-
-                            <div class="flex items-center gap-4 mt-2">
-                                <button id="btn-${s.id}" onclick="AudioController.toggle(${s.id})" class="play-btn w-10 h-10 md:w-12 md:h-12 rounded-full bg-otter-accent text-black flex items-center justify-center shrink-0 hover:scale-105 transition-all shadow-lg">
-                                    <i class="fas fa-play ml-0.5"></i>
-                                </button>
-                                
-                                <div class="flex-grow flex flex-col justify-center gap-1 group/bar">
-                                    <div class="relative w-full h-1 bg-white/10 rounded-full cursor-pointer py-2 bg-clip-content" onclick="AudioController.seek(event, ${s.id})">
-                                        <div class="absolute top-1/2 -translate-y-1/2 left-0 w-full h-1 bg-white/10 rounded-full"></div>
-                                        <div id="progress-${s.id}" class="absolute top-1/2 -translate-y-1/2 left-0 h-1 bg-otter-accent rounded-full w-0 transition-all duration-75"></div>
-                                        <div id="thumb-${s.id}" class="absolute top-1/2 -translate-y-1/2 -ml-1.5 left-0 w-3 h-3 bg-white rounded-full opacity-0 group-hover/bar:opacity-100 transition-opacity"></div>
-                                    </div>
-                                     <div class="flex justify-between text-[10px] text-gray-400 font-montserrat tabular-nums">
-                                        <span id="time-cur-${s.id}">0:00</span>
-                                        <span id="time-dur-${s.id}">${s.duration}</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="hidden md:block mt-2 text-gray-500 text-sm leading-relaxed">${s.description}</p>
                             
-                            <!-- Multi-language support footer -->
-                            ${s.variants ? `
-                            <div class="flex gap-4 mt-4 text-[10px] uppercase font-bold text-gray-500 border-t border-white/5 pt-3">
-                                ${s.variants.map((v, idx) => `
-                                    <button 
-                                        onclick="UI.switchLanguage(${s.id}, ${idx})" 
-                                        class="lang-btn-${s.id} hover:text-otter-accent transition-all ${s.activeVariant === idx ? 'text-otter-accent' : ''}"
-                                        id="lang-btn-${s.id}-${idx}"
-                                    >
-                                        ${v.lang}
-                                    </button>
-                                `).join('')}
+                            <div class="flex xs:hidden gap-3 mb-4 text-gray-500 text-[10px] uppercase font-bold">
+                                ${s.spotifyUrl ? `<a href="${s.spotifyUrl}" target="_blank" class="hover:text-[#1DB954]">Spotify</a>` : ''}
+                                ${s.youtubeUrl ? `<a href="${s.youtubeUrl}" target="_blank" class="hover:text-[#FF0000]">YouTube</a>` : ''}
                             </div>
-                            ` : ''}
+
+                            <div class="flex items-center gap-4 mt-2 sm:mt-4">
+                                <button id="btn-${s.id}" onclick="AudioController.toggle(${s.id})" class="play-btn w-10 h-10 md:w-12 md:h-12 rounded-full bg-otter-accent text-white flex items-center justify-center shrink-0">
+                                    <i class="fas fa-${s.previewUrl ? 'play ml-0.5' : 'lock'} text-sm sm:text-base"></i>
+                                </button>
+                                <div class="flex-grow">
+                                    <div class="relative w-full h-1 bg-white/10 rounded-full py-2 bg-clip-content">
+                                        <div id="progress-${s.id}" class="h-1 bg-otter-accent rounded-full w-0 transition-all duration-100"></div>
+                                    </div>
+                                    <div class="flex justify-between text-[10px] text-gray-400 mt-1 uppercase font-bold">
+                                        <span id="time-cur-${s.id}">0:00</span><span id="time-dur-${s.id}">${s.duration}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            ${s.variants ? `
+                            <div class="flex flex-wrap gap-2 sm:gap-4 mt-4 border-t border-white/5 pt-3">
+                                ${s.variants.map((v, idx) => `
+                                    <button onclick="UI.switchLanguage(${s.id}, ${idx})" class="text-[9px] uppercase font-bold transition-all ${s.activeVariant === idx ? 'text-otter-accent' : 'text-gray-500'}">${v.lang}</button>
+                                `).join('')}
+                            </div>` : ''}
                         </div>
                     </div>
                 `).join('');
-                this.setupObservers();
             },
-
             switchLanguage(songId, variantIdx) {
-                const song = songs.find(s => s.id === songId);
+                const song = songsGlobal.find(s => s.id === songId);
                 if (!song || !song.variants) return;
-
-                const variant = song.variants[variantIdx];
-                
-                // Update internal data
-                song.activeVariant = variantIdx;
-                song.title = variant.title;
-                song.previewUrl = variant.url;
-                song.duration = variant.duration; // Update current duration in data
-
-                // Update UI elements immediately
-                const titleEl = document.getElementById(`title-${songId}`);
-                if (titleEl) titleEl.innerText = variant.title;
-
-                const durEl = document.getElementById(`time-dur-${songId}`);
-                if (durEl) durEl.innerText = variant.duration;
-
-                // Handle Audio logic if it's the currently playing song
-                if (AudioController.activeId === songId) {
-                    const wasPlaying = !AudioController.audio.paused;
-                    AudioController.audio.src = variant.url;
-                    AudioController.audio.load();
-                    if (wasPlaying) {
-                        AudioController.audio.play();
-                    }
-                    // Update sticky player if visible
-                    const stickyTitle = document.getElementById('sticky-title');
-                    if (stickyTitle) stickyTitle.innerText = variant.title;
-                    
-                    const stickyDur = document.getElementById('sticky-time-total');
-                    if (stickyDur) stickyDur.innerText = variant.duration;
-                }
-
-                // Update variant button styles
-                document.querySelectorAll(`.lang-btn-${songId}`).forEach(btn => btn.classList.remove('text-otter-accent'));
-                const activeBtn = document.getElementById(`lang-btn-${songId}-${variantIdx}`);
-                if (activeBtn) activeBtn.classList.add('text-otter-accent');
+                const v = song.variants[variantIdx];
+                song.activeVariant = variantIdx; song.title = v.title; song.previewUrl = v.url; song.duration = v.duration;
+                this.renderSongs();
+                if (AudioController.activeId === songId) { AudioController.audio.src = v.url; AudioController.audio.load(); AudioController.audio.play(); }
             },
-
-            setupObservers() {
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(e => {
-                        if(e.isIntersecting) {
-                            e.target.classList.add('animate-fade-in-up');
-                            observer.unobserve(e.target);
-                        }
-                    })
-                }, { threshold: 0.1 });
-                document.querySelectorAll('.card-fade-item').forEach(el => observer.observe(el));
-            },
-
-            setupNav() {
-                let lastScroll = 0;
-                const nav = document.getElementById('navbar');
-                window.addEventListener('scroll', () => {
-                    const current = window.pageYOffset;
-                    nav.style.transform = (current > 50 && current > lastScroll) ? 'translateY(-100%)' : 'translateY(0)';
-                    lastScroll = current;
-                });
-            },
-
-            openProfile() {
-                document.getElementById('profile-view').style.transform = 'translateX(0)';
-                document.body.style.overflow = 'hidden';
-            },
-
-            closeProfile() {
-                document.getElementById('profile-view').style.transform = 'translateX(100%)';
-                document.body.style.overflow = '';
-            },
-
-            openLightbox(btn) {
-                const img = document.getElementById('lightbox-img');
-                img.src = btn.getAttribute('data-src');
-                const lb = document.getElementById('lightbox');
-                lb.classList.remove('pointer-events-none', 'opacity-0');
-            },
-
-            closeLightbox() {
-                const lb = document.getElementById('lightbox');
-                lb.classList.add('pointer-events-none', 'opacity-0');
-            },
-
-            openEmailModal() {
-                const m = document.getElementById('email-modal');
-                m.classList.remove('hidden');
-                setTimeout(() => {
-                    m.classList.remove('opacity-0');
-                    document.getElementById('email-modal-content').classList.remove('scale-95');
-                }, 10);
-            },
-
-            closeEmailModal() {
-                const m = document.getElementById('email-modal');
-                m.classList.add('opacity-0');
-                document.getElementById('email-modal-content').classList.add('scale-95');
-                setTimeout(() => m.classList.add('hidden'), 300);
-            }
+            openProfile() { document.getElementById('profile-view').style.transform = 'translateX(0)'; document.body.style.overflow = 'hidden'; },
+            closeProfile() { document.getElementById('profile-view').style.transform = 'translateX(100%)'; document.body.style.overflow = ''; },
+            openLightbox(btn) { const img = document.getElementById("lightbox-img"); img.src = btn.getAttribute("data-src"); const lb = document.getElementById("lightbox"); lb.classList.remove("opacity-0", "pointer-events-none"); },
+            closeLightbox() { const lb = document.getElementById("lightbox"); lb.classList.add("opacity-0", "pointer-events-none"); },
+            openEmailModal() { const m = document.getElementById('email-modal'); m.classList.remove('hidden'); setTimeout(() => { m.classList.remove('opacity-0'); document.getElementById('email-modal-content').classList.remove('scale-95'); }, 10); },
+            closeEmailModal() { const m = document.getElementById('email-modal'); m.classList.add('opacity-0'); document.getElementById('email-modal-content').classList.add('scale-95'); setTimeout(() => m.classList.add('hidden'), 300); }
         };
 
-        window.addEventListener('DOMContentLoaded', () => {
-            AudioController.init();
-            UI.init();
-        });
+        window.addEventListener('DOMContentLoaded', () => { AudioController.init(); UI.init(); });
+        document.addEventListener("keydown", (e) => { if (e.key === "Escape") UI.closeLightbox(); });
     </script>
 </body>
 </html>
